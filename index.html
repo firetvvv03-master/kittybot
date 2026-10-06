@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Neon Letter Mayhem - Boss Edition with Pets</title>
+    <title>Neon Letter Mayhem - Boss Edition with Pets & Quests</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
@@ -156,16 +156,21 @@
                 </div>
 
                 <!-- Skins & Pets Shop Button -->
-                <button id="open-shop-btn" class="w-full py-2.5 px-6 mb-4 rounded-xl bg-slate-900/90 border border-fuchsia-500/50 text-fuchsia-300 font-bold font-orbitron text-sm tracking-wider flex items-center justify-center gap-2 hover:bg-fuchsia-950/40 transition-all">
+                <button id="open-shop-btn" class="w-full py-2.5 px-6 mb-2 rounded-xl bg-slate-900/90 border border-fuchsia-500/50 text-fuchsia-300 font-bold font-orbitron text-sm tracking-wider flex items-center justify-center gap-2 hover:bg-fuchsia-950/40 transition-all">
                     <span>🐱</span> WARDROBE, PETS & SHOP (<span id="shop-coins-val">0</span> 🪙)
+                </button>
+
+                <!-- Quests & Achievements Button -->
+                <button id="open-quests-btn" class="w-full py-2.5 px-6 mb-4 rounded-xl bg-slate-900/90 border border-cyan-500/50 text-cyan-300 font-bold font-orbitron text-sm tracking-wider flex items-center justify-center gap-2 hover:bg-cyan-950/40 transition-all">
+                    <span>📜</span> DAILY QUESTS & ACHIEVEMENTS
                 </button>
 
                 <!-- Controls Guide Section -->
                 <div class="w-full bg-slate-900/60 rounded-2xl p-3 mb-4 border border-cyan-900/50 text-left text-xs text-gray-300 space-y-1.5">
                     <div class="font-bold text-cyan-400 font-orbitron mb-1 text-center uppercase tracking-wider">Controls</div>
                     <div class="flex justify-between items-center"><span class="text-gray-400">Move Left / Right:</span> <span class="font-bold text-white bg-slate-800 px-2 py-0.5 rounded border border-gray-700">A / D or ← / →</span></div>
-                    <div class="flex justify-between items-center"><span class="text-gray-400">Jump / Double Jump:</span> <span class="font-bold text-white bg-slate-800 px-2 py-0.5 rounded border border-gray-700">W / ↑ (Press Twice)</span></div>
-                    <div class="flex justify-between items-center"><span class="text-gray-400">Burst Dash:</span> <span class="font-bold text-white bg-slate-800 px-2 py-0.5 rounded border border-gray-700">SHIFT</span></div>
+                    <div class="flex justify-between items-center"><span class="text-gray-400">Jump / Double Jump:</span> <span class="font-bold text-white bg-slate-800 px-2 py-0.5 rounded border border-gray-700">W / ↑ or Tap Screen</span></div>
+                    <div class="flex justify-between items-center"><span class="text-gray-400">Burst Dash / Slide:</span> <span class="font-bold text-white bg-slate-800 px-2 py-0.5 rounded border border-gray-700">SHIFT or Swipe Screen</span></div>
                     <div class="flex justify-between items-center"><span class="text-gray-400">Boss Skills (During Boss):</span> <span class="font-bold text-white bg-slate-800 px-2 py-0.5 rounded border border-gray-700">1, 2, 3 Keys</span></div>
                 </div>
 
@@ -185,6 +190,9 @@
                 </button>
                 <button id="pause-shop-btn" class="w-full py-3 mb-3 rounded-xl bg-slate-900 border border-fuchsia-500/60 text-fuchsia-300 font-bold font-orbitron text-sm tracking-wider hover:bg-fuchsia-950/30">
                     WARDROBE & PETS SHOP
+                </button>
+                <button id="pause-quests-btn" class="w-full py-3 mb-3 rounded-xl bg-slate-900 border border-cyan-500/60 text-cyan-300 font-bold font-orbitron text-sm tracking-wider hover:bg-cyan-950/30">
+                    QUESTS & ACHIEVEMENTS
                 </button>
                 <button id="quit-to-menu-btn" class="w-full py-2.5 rounded-xl bg-slate-800 border border-gray-600 text-gray-300 font-bold font-orbitron text-xs tracking-wider hover:bg-slate-700">
                     QUIT TO MAIN MENU
@@ -215,6 +223,33 @@
                 </div>
 
                 <button id="close-shop-btn" class="py-2.5 px-8 rounded-xl bg-slate-800 border border-gray-600 text-white font-bold font-orbitron text-sm tracking-wider hover:bg-slate-700 transition-all">
+                    BACK
+                </button>
+            </div>
+        </div>
+
+        <!-- Quests & Achievements Modal -->
+        <div id="quests-modal" class="hidden absolute inset-0 flex items-center justify-center bg-black/90 backdrop-blur-lg z-50 overflow-y-auto py-6">
+            <div class="glass-panel max-w-xl w-11/12 p-6 rounded-3xl flex flex-col items-center border border-cyan-500/40 shadow-[0_0_60px_rgba(0,243,255,0.25)] my-auto">
+                <div class="flex justify-between w-full items-center mb-3">
+                    <h2 class="text-xl md:text-2xl font-black font-orbitron text-cyan-300">QUESTS & ACHIEVEMENTS</h2>
+                    <div class="text-amber-300 font-bold font-orbitron text-sm">🪙 <span id="quest-coin-val">0</span> Coins</div>
+                </div>
+
+                <!-- Quests & Achievements Tabs -->
+                <div class="flex gap-2 w-full mb-4">
+                    <button id="tab-daily-btn" onclick="switchQuestTab('daily')" class="flex-1 py-2 rounded-xl font-bold font-orbitron text-xs border border-cyan-500 bg-cyan-600 text-slate-950 font-black transition-all">🌟 DAILY QUESTS (8-10)</button>
+                    <button id="tab-ach-btn" onclick="switchQuestTab('achievements')" class="flex-1 py-2 rounded-xl font-bold font-orbitron text-xs border border-amber-500/50 bg-slate-900 text-amber-300 transition-all">🏆 ACHIEVEMENTS</button>
+                </div>
+
+                <p id="quest-subtitle" class="text-xs text-gray-300 mb-4 text-center">Complete 8-10 daily quests that refresh every day!</p>
+
+                <!-- Quests / Achievements List Container -->
+                <div id="quests-grid" class="flex flex-col gap-2.5 w-full max-h-[45vh] overflow-y-auto pr-1 mb-5">
+                    <!-- Dynamic List populated via JS -->
+                </div>
+
+                <button id="close-quests-btn" class="py-2.5 px-8 rounded-xl bg-slate-800 border border-gray-600 text-white font-bold font-orbitron text-sm tracking-wider hover:bg-slate-700 transition-all">
                     BACK
                 </button>
             </div>
@@ -403,6 +438,291 @@
         let hasSingularity = false;
         let plasmaSlashes = [];
 
+        // ==========================================
+        // DAILY QUEST & PROGRESSIVE ACHIEVEMENT SYSTEM
+        // ==========================================
+        const TODAY_DATE_STR = new Date().toDateString();
+
+        const DAILY_QUEST_TEMPLATES = [
+            { id: 'dq_score', title: 'Neon High Roller', desc: 'Score 5,000 points in total', target: 5000, reward: 50, type: 'score' },
+            { id: 'dq_coins', title: 'Coin Collector', desc: 'Collect 30 coins', target: 30, reward: 40, type: 'coins' },
+            { id: 'dq_dash', title: 'Hyper Dasher', desc: 'Use Dash 15 times', target: 15, reward: 35, type: 'dash' },
+            { id: 'dq_boss', title: 'Boss Slayer', desc: 'Defeat 1 Boss', target: 1, reward: 60, type: 'boss' },
+            { id: 'dq_level', title: 'Stage Crawler', desc: 'Reach Level 3', target: 3, reward: 45, type: 'level' },
+            { id: 'dq_combo', title: 'Combo Master', desc: 'Achieve a 10x Combo', target: 10, reward: 40, type: 'combo' },
+            { id: 'dq_survive', title: 'Endurance Test', desc: 'Survive for 120 seconds total', target: 120, reward: 50, type: 'time' },
+            { id: 'dq_powerup', title: 'Power-up Hunter', desc: 'Collect 3 Power-up Orbs', target: 3, reward: 45, type: 'powerup' },
+            { id: 'dq_skills', title: 'Combat Tactician', desc: 'Use 3 Boss Skills or Pet Skills', target: 3, reward: 55, type: 'skill' },
+            { id: 'dq_runs', title: 'Dedicated Runner', desc: 'Complete 3 Runs', target: 3, reward: 30, type: 'runs' }
+        ];
+
+        const ACHIEVEMENT_DEFINITIONS = [
+            {
+                id: 'ach_score',
+                name: 'Score Legend',
+                desc: 'Reach total lifetime score milestones',
+                tiers: [
+                    { target: 20000, reward: 100 },
+                    { target: 100000, reward: 300 },
+                    { target: 500000, reward: 1000 },
+                    { target: 2000000, reward: 3000 }
+                ],
+                type: 'lifetime_score'
+            },
+            {
+                id: 'ach_coins',
+                name: 'Vault Hoarder',
+                desc: 'Collect lifetime coins',
+                tiers: [
+                    { target: 100, reward: 100 },
+                    { target: 500, reward: 300 },
+                    { target: 2000, reward: 1000 },
+                    { target: 10000, reward: 3500 }
+                ],
+                type: 'lifetime_coins'
+            },
+            {
+                id: 'ach_boss',
+                name: 'Titan Bane',
+                desc: 'Defeat giant neon bosses',
+                tiers: [
+                    { target: 1, reward: 150 },
+                    { target: 5, reward: 500 },
+                    { target: 20, reward: 2000 },
+                    { target: 50, reward: 5000 }
+                ],
+                type: 'lifetime_boss'
+            },
+            {
+                id: 'ach_dash',
+                name: 'Lightning Reflexes',
+                desc: 'Use burst dashes',
+                tiers: [
+                    { target: 50, reward: 100 },
+                    { target: 250, reward: 400 },
+                    { target: 1000, reward: 1500 },
+                    { target: 5000, reward: 4000 }
+                ],
+                type: 'lifetime_dash'
+            },
+            {
+                id: 'ach_survive',
+                name: 'Neon Survivor',
+                desc: 'Accumulate survival time in seconds',
+                tiers: [
+                    { target: 300, reward: 150 },
+                    { target: 1500, reward: 600 },
+                    { target: 6000, reward: 2000 },
+                    { target: 20000, reward: 6000 }
+                ],
+                type: 'lifetime_time'
+            }
+        ];
+
+        let savedQuestData = JSON.parse(localStorage.getItem('neon_daily_quests')) || {};
+        if (savedQuestData.date !== TODAY_DATE_STR) {
+            savedQuestData = {
+                date: TODAY_DATE_STR,
+                quests: DAILY_QUEST_TEMPLATES.map(q => ({ ...q, progress: 0, completed: false, claimed: false }))
+            };
+            localStorage.setItem('neon_daily_quests', JSON.stringify(savedQuestData));
+        }
+
+        let savedAchievementData = JSON.parse(localStorage.getItem('neon_achievements')) || {};
+        ACHIEVEMENT_DEFINITIONS.forEach(ach => {
+            if (!savedAchievementData[ach.id]) {
+                savedAchievementData[ach.id] = { tierIndex: 0, progress: 0 };
+            }
+        });
+        localStorage.setItem('neon_achievements', JSON.stringify(savedAchievementData));
+
+        let lifetimeStats = JSON.parse(localStorage.getItem('neon_lifetime_stats')) || {
+            lifetime_score: 0,
+            lifetime_coins: 0,
+            lifetime_boss: 0,
+            lifetime_dash: 0,
+            lifetime_time: 0
+        };
+
+        function saveGameProgress() {
+            localStorage.setItem('neon_daily_quests', JSON.stringify(savedQuestData));
+            localStorage.setItem('neon_achievements', JSON.stringify(savedAchievementData));
+            localStorage.setItem('neon_lifetime_stats', JSON.stringify(lifetimeStats));
+        }
+
+        function updateQuestProgress(type, amount) {
+            if (!savedQuestData.quests) return;
+            savedQuestData.quests.forEach(q => {
+                if (!q.completed && q.type === type) {
+                    q.progress = Math.min(q.target, q.progress + amount);
+                    if (q.progress >= q.target) {
+                        q.completed = true;
+                    }
+                }
+            });
+            saveGameProgress();
+        }
+
+        function updateLifetimeStat(type, amount) {
+            if (lifetimeStats[type] !== undefined) {
+                lifetimeStats[type] += amount;
+                saveGameProgress();
+
+                ACHIEVEMENT_DEFINITIONS.forEach(ach => {
+                    if (ach.type === type) {
+                        const achState = savedAchievementData[ach.id];
+                        if (achState.tierIndex < ach.tiers.length) {
+                            achState.progress = lifetimeStats[type];
+                        }
+                    }
+                });
+            }
+        }
+
+        let activeQuestTab = 'daily';
+        const openQuestsBtn = document.getElementById('open-quests-btn');
+        const pauseQuestsBtn = document.getElementById('pause-quests-btn');
+        const closeQuestsBtn = document.getElementById('close-quests-btn');
+        const questsModal = document.getElementById('quests-modal');
+        const tabDailyBtn = document.getElementById('tab-daily-btn');
+        const tabAchBtn = document.getElementById('tab-ach-btn');
+        const questSubtitle = document.getElementById('quest-subtitle');
+        const questsGrid = document.getElementById('quests-grid');
+        const questCoinValEl = document.getElementById('quest-coin-val');
+
+        function updateQuestCoinsDisplay() {
+            questCoinValEl.textContent = coins;
+        }
+
+        window.switchQuestTab = function(tab) {
+            activeQuestTab = tab;
+            tabDailyBtn.className = "flex-1 py-2 rounded-xl font-bold font-orbitron text-xs border border-cyan-500/50 bg-slate-900 text-cyan-300 transition-all";
+            tabAchBtn.className = "flex-1 py-2 rounded-xl font-bold font-orbitron text-xs border border-amber-500/50 bg-slate-900 text-amber-300 transition-all";
+
+            if (tab === 'daily') {
+                tabDailyBtn.className = "flex-1 py-2 rounded-xl font-bold font-orbitron text-xs border border-cyan-500 bg-cyan-600 text-slate-950 font-black transition-all";
+                questSubtitle.textContent = "Complete 8-10 daily quests that refresh every day!";
+            } else {
+                tabAchBtn.className = "flex-1 py-2 rounded-xl font-bold font-orbitron text-xs border border-amber-500 bg-amber-600 text-slate-950 font-black transition-all";
+                questSubtitle.textContent = "Harder and harder progressive achievement tiers with big coin rewards!";
+            }
+            renderQuestsModal();
+        };
+
+        function renderQuestsModal() {
+            updateQuestCoinsDisplay();
+            questsGrid.innerHTML = '';
+
+            if (activeQuestTab === 'daily') {
+                savedQuestData.quests.forEach((q, idx) => {
+                    const pct = Math.min(100, (q.progress / q.target) * 100);
+                    const card = document.createElement('div');
+                    card.className = "skin-card p-3 rounded-2xl flex flex-col gap-2 relative";
+
+                    let actionHtml = '';
+                    if (q.claimed) {
+                        actionHtml = `<span class="text-xs font-bold text-gray-400 font-orbitron">CLAIMED ✓</span>`;
+                    } else if (q.completed) {
+                        actionHtml = `<button onclick="claimQuestReward(${idx})" class="py-1 px-4 rounded-lg bg-cyan-500 text-slate-950 text-xs font-black font-orbitron hover:bg-cyan-400">CLAIM 🪙 ${q.reward}</button>`;
+                    } else {
+                        actionHtml = `<span class="text-xs font-bold text-cyan-300 font-orbitron">${q.progress} / ${q.target}</span>`;
+                    }
+
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="text-xs font-bold font-orbitron text-white">${q.title}</div>
+                                <div class="text-[10px] text-gray-300">${q.desc}</div>
+                            </div>
+                            <div>${actionHtml}</div>
+                        </div>
+                        <div class="w-full h-1.5 bg-gray-800 rounded-full overflow-hidden mt-1">
+                            <div class="h-full bg-cyan-400 transition-all" style="width: ${pct}%"></div>
+                        </div>
+                    `;
+                    questsGrid.appendChild(card);
+                });
+            } else {
+                ACHIEVEMENT_DEFINITIONS.forEach(ach => {
+                    const achState = savedAchievementData[ach.id];
+                    const isMaxTier = achState.tierIndex >= ach.tiers.length;
+                    const currentTier = isMaxTier ? ach.tiers[ach.tiers.length - 1] : ach.tiers[achState.tierIndex];
+                    const prevTarget = achState.tierIndex === 0 ? 0 : ach.tiers[achState.tierIndex - 1].target;
+                    const rangeTarget = currentTier.target - prevTarget;
+                    const currentProgressInRange = Math.max(0, achState.progress - prevTarget);
+                    const pct = isMaxTier ? 100 : Math.min(100, (currentProgressInRange / rangeTarget) * 100);
+
+                    const card = document.createElement('div');
+                    card.className = "skin-card p-3 rounded-2xl flex flex-col gap-2 relative";
+
+                    let actionHtml = '';
+                    if (isMaxTier) {
+                        actionHtml = `<span class="text-xs font-bold text-amber-400 font-orbitron">MAX TIER ★</span>`;
+                    } else if (achState.progress >= currentTier.target) {
+                        actionHtml = `<button onclick="claimAchievementReward('${ach.id}')" class="py-1 px-4 rounded-lg bg-amber-500 text-slate-950 text-xs font-black font-orbitron hover:bg-amber-400">CLAIM TIER ${achState.tierIndex + 1} (🪙 ${currentTier.reward})</button>`;
+                    } else {
+                        actionHtml = `<span class="text-xs font-bold text-amber-300 font-orbitron">Tier ${achState.tierIndex + 1}: ${achState.progress} / ${currentTier.target}</span>`;
+                    }
+
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="text-xs font-bold font-orbitron text-white">${ach.name} (Tier ${Math.min(achState.tierIndex + 1, ach.tiers.length)}/${ach.tiers.length})</div>
+                                <div class="text-[10px] text-gray-300">${ach.desc}</div>
+                            </div>
+                            <div>${actionHtml}</div>
+                        </div>
+                        <div class="w-full h-1.5 bg-gray-800 rounded-full overflow-hidden mt-1">
+                            <div class="h-full bg-amber-400 transition-all" style="width: ${pct}%"></div>
+                        </div>
+                    `;
+                    questsGrid.appendChild(card);
+                });
+            }
+        }
+
+        window.claimQuestReward = function(idx) {
+            const q = savedQuestData.quests[idx];
+            if (q.completed && !q.claimed) {
+                q.claimed = true;
+                updateCoins(q.reward);
+                soundFX.playPowerup();
+                saveGameProgress();
+                renderQuestsModal();
+            }
+        };
+
+        window.claimAchievementReward = function(achId) {
+            const ach = ACHIEVEMENT_DEFINITIONS.find(a => a.id === achId);
+            const achState = savedAchievementData[achId];
+            if (achState.tierIndex < ach.tiers.length) {
+                const tier = ach.tiers[achState.tierIndex];
+                if (achState.progress >= tier.target) {
+                    updateCoins(tier.reward);
+                    achState.tierIndex++;
+                    soundFX.playPowerup();
+                    saveGameProgress();
+                    renderQuestsModal();
+                }
+            }
+        };
+
+        openQuestsBtn.addEventListener('click', () => {
+            renderQuestsModal();
+            questsModal.classList.remove('hidden');
+        });
+
+        pauseQuestsBtn.addEventListener('click', () => {
+            pauseModal.classList.add('hidden');
+            renderQuestsModal();
+            questsModal.classList.remove('hidden');
+        });
+
+        closeQuestsBtn.addEventListener('click', () => {
+            questsModal.classList.add('hidden');
+            if (isPaused) pauseModal.classList.remove('hidden');
+        });
+
         // Kitty-Bot Skins
         const SKINS = [
             { id: 'cyber', name: 'Cyber Kitty', type: 'free', cost: 0, color: '#00f3ff', core: '#ffffff', ear: '#00f3ff' },
@@ -431,14 +751,12 @@
             { id: 'obj_music', name: '🎵 Synth Notes', category: 'Music', type: 'ad', cost: 0, symbol: '🎵' }
         ];
 
-        // Pet System (4 Coin Pets + 6 Ad Super Pets with 10s active skill)
+        // Pet System
         const PETS = [
-            // 4 Coin Pets (Buy with coins, passive helpers)
             { id: 'pet_sparky', name: 'Sparky', type: 'coin', cost: 100, symbol: '⚡', power: 'Passively zaps a hazard every 15s' },
             { id: 'pet_shieldy', name: 'Shieldy', type: 'coin', cost: 200, symbol: '🛡️', power: 'Regenerates a shield every 45s' },
             { id: 'pet_kitty', name: 'Mini Cat', type: 'coin', cost: 350, symbol: '🐱', power: 'Increases coin gain by +50%' },
             { id: 'pet_bot', name: 'Cyber Bot', type: 'coin', cost: 500, symbol: '🤖', power: 'Boosts score multiplier by +0.5x' },
-            // 6 Ad Pets (Super cute, slightly stronger, skill active every 10 sec)
             { id: 'pet_dragon', name: 'Neon Dragon', type: 'ad', cost: 0, symbol: '🐉', power: 'Every 10s: Breathes fire to clear nearest hazard' },
             { id: 'pet_phoenix', name: 'Cyber Phoenix', type: 'ad', cost: 0, symbol: '🔥', power: 'Every 10s: Restores +1 heart or heals Kitty' },
             { id: 'pet_owl', name: 'Quantum Owl', type: 'ad', cost: 0, symbol: '🦉', power: 'Every 10s: Drops 3 bonus coins' },
@@ -457,7 +775,7 @@
         let currentPetId = localStorage.getItem('neon_letter_current_pet') || 'pet_sparky';
 
         let activeShopTab = 'kitty';
-        let petSkillTimer = 0; // Tracks 10-second intervals for ad pets
+        let petSkillTimer = 0;
 
         // UI References
         const scoreValEl = document.getElementById('score-val');
@@ -511,7 +829,6 @@
         modalCoinValEl.textContent = coins;
 
         function updateCoins(amount) {
-            // Apply Mini Cat pet bonus (+50% coins)
             let finalAmount = amount;
             if (amount > 0 && currentPetId === 'pet_kitty') {
                 finalAmount = Math.ceil(amount * 1.5);
@@ -520,6 +837,11 @@
             coinCountEl.textContent = coins;
             shopCoinsValEl.textContent = coins;
             modalCoinValEl.textContent = coins;
+            questCoinValEl.textContent = coins;
+            if (amount > 0) {
+                updateQuestProgress('coins', amount);
+                updateLifetimeStat('lifetime_coins', amount);
+            }
         }
 
         window.switchShopTab = function(tab) {
@@ -760,7 +1082,7 @@
         const OBJECT_SYMBOLS = {
             obj_animals: ['🐱', '🐶', '🦊', '🐼', '🐰', '🐯'],
             obj_tools: ['🔧', '⚙', '🔨', '🔩', '⚡', '🛠'],
-            obj_transport: ['🚀', '🛸', '🏎️️', '🚁', '⛵', '🚂'],
+            obj_transport: ['🚀', '🛸', '🏎', '🚁', '⛵', '🚂'],
             obj_houseware: ['💡', '🛋️', '🪴', '⏰', '🗝️', '🔮'],
             obj_holiday: ['🎄', '🎃', '🎁', '⭐', '🎆', '❤️'],
             obj_food: ['🍕', '🍔', '🌮', '🍩', '🍿', '🧁'],
@@ -853,6 +1175,8 @@
                         soundFX.playDash();
                         triggerScreenShake(5, 8);
                         createParticles(this.x + this.width / 2, this.y + this.height / 2, '#ff00ff', 20);
+                        updateQuestProgress('dash', 1);
+                        updateLifetimeStat('lifetime_dash', 1);
                     }
                 }
 
@@ -998,7 +1322,6 @@
             }
         };
 
-        // Pet Object for Floating Companion helper
         const petCompanion = {
             x: window.innerWidth / 2,
             y: window.innerHeight / 2,
@@ -1147,8 +1470,8 @@
                 const bossTier = Math.floor((level - 1) / 5) % 6;
                 const bossTypes = [
                     { name: '⚠️ MECHA-CAT BOSS ⚠️', colorHue: 340, symbol: '🐱' },
-                    { name: '⚠️️ CYBER-DRAGON BOSS ⚠️', colorHue: 120, symbol: '🐉' },
-                    { name: '⚠️ NEON-PIRATE BOSS ⚠️', colorHue: 45, symbol: '☠️' },
+                    { name: '⚠ CYBER-DRAGON BOSS ⚠️', colorHue: 120, symbol: '🐉' },
+                    { name: '⚠️ NEON-PIRATE BOSS ⚠️', colorHue: 45, symbol: '☠️️' },
                     { name: '⚠️ QUANTUM-VOID BOSS ⚠️', colorHue: 280, symbol: '👾' },
                     { name: '⚠️ PLASMA-PHANTOM BOSS ⚠️', colorHue: 200, symbol: '👻' },
                     { name: '⚠️ SUPERNOVA-CORE BOSS ⚠️', colorHue: 20, symbol: '☀️' }
@@ -1436,6 +1759,7 @@
 
             soundFX.playPowerup();
             skillCooldowns[skillId] = skillMaxCooldowns[skillId];
+            updateQuestProgress('skill', 1);
 
             if (skillId === 1) {
                 bossInstance.takeDamage(35);
@@ -1457,14 +1781,13 @@
             }
         }
 
-        // Trigger Ad Pet Skills (Activated automatically every 10 seconds / 600 frames)
         function triggerAdPetSkill() {
             soundFX.playPowerup();
+            updateQuestProgress('skill', 1);
             const pet = PETS.find(p => p.id === currentPetId);
             if (!pet) return;
 
             if (currentPetId === 'pet_dragon') {
-                // Neon Dragon: Breathes fire, clears nearest hazard
                 if (letters.length > 0) {
                     const target = letters[0];
                     createParticles(target.x, target.y, '#ff3300', 30);
@@ -1475,17 +1798,14 @@
                     showPowerupBanner('🐉 DRAGON FLAME HIT BOSS -25 HP!', '#ff3300');
                 }
             } else if (currentPetId === 'pet_phoenix') {
-                // Cyber Phoenix: Restores +1 heart or blast
                 if (lives < 6) lives++;
                 updateLivesUI();
                 triggerBlastShockwave();
                 showPowerupBanner('🔥 PHOENIX REBIRTH & HEAL!', '#ff6600');
             } else if (currentPetId === 'pet_owl') {
-                // Quantum Owl: Drops 5 bonus coins
                 updateCoins(5);
                 showPowerupBanner('🦉 QUANTUM OWL DROPPED +5 COINS!', '#00f3ff');
             } else if (currentPetId === 'pet_panther') {
-                // Void Panther: Strikes boss or clears hazards
                 if (isBossActive && bossInstance) {
                     bossInstance.takeDamage(40);
                     showPowerupBanner('🐆 PANTHER SHADOW STRIKE -40 HP!', '#9933ff');
@@ -1494,19 +1814,16 @@
                     showPowerupBanner('🐆 PANTHER SHADOW VORTEX!', '#9933ff');
                 }
             } else if (currentPetId === 'pet_unicorn') {
-                // Starlight Unicorn: Rainbow coin burst + points
                 updateCoins(8);
                 addScore(500);
                 showPowerupBanner('🦄 UNICORN RAINBOW BURST! +8 COINS & 500 PTS', '#ff00aa');
             } else if (currentPetId === 'pet_kitsune') {
-                // Cyber Kitsune: 3 seconds of invincibility
                 player.invincibleTimer = 180;
                 showPowerupBanner('🦊 KITSUNE 3s INVINCIBILITY!', '#39ff14');
             }
             setTimeout(() => powerupBanner.classList.add('hidden'), 2000);
         }
 
-        // Trigger Coin Pet Passive Abilities (Sparky zaps every 15s, Shieldy shields every 45s)
         function triggerCoinPetPassive(frameCounter) {
             if (currentPetId === 'pet_sparky' && frameCounter % 900 === 0) {
                 if (letters.length > 0) {
@@ -1540,7 +1857,6 @@
         function addScore(points) {
             combo++;
             scoreMultiplier = 1.0 + Math.floor(combo / 10) * 0.5;
-            // Apply Cyber Bot pet score boost (+0.5x multiplier)
             if (currentPetId === 'pet_bot') scoreMultiplier += 0.5;
             if (hasDoublePoints) scoreMultiplier *= 2.0;
             const pts = Math.round(points * scoreMultiplier);
@@ -1549,9 +1865,13 @@
             scoreValEl.textContent = String(score).padStart(6, '0');
             multiplierBadgeEl.textContent = `${scoreMultiplier.toFixed(1)}x MULTI`;
 
+            updateQuestProgress('score', pts);
+            updateLifetimeStat('lifetime_score', pts);
+
             if (combo > 3 && comboCountEl) {
                 comboCountEl.textContent = `${combo} COMBO!`;
                 comboCountEl.style.opacity = '1';
+                updateQuestProgress('combo', combo);
             }
 
             if (!isBossActive) {
@@ -1585,6 +1905,7 @@
             levelProgressBar.style.width = '0%';
             soundFX.playPowerup();
             showAnnouncement("LEVEL UP!", `STAGE ${currentLevel} REACHED`);
+            updateQuestProgress('level', 1);
         }
 
         function spawnBoss() {
@@ -1607,6 +1928,8 @@
             addScore(3000);
             advanceLevel();
             soundFX.playPowerup();
+            updateQuestProgress('boss', 1);
+            updateLifetimeStat('lifetime_boss', 1);
         }
 
         function resetCombo() {
@@ -1630,6 +1953,7 @@
         function activatePowerup(type) {
             soundFX.playPowerup();
             activePowerup = type;
+            updateQuestProgress('powerup', 1);
             if (type === 'SHIELD') {
                 hasShield = true;
                 showPowerupBanner('SHIELD ACTIVE', '#00f3ff');
@@ -1644,109 +1968,88 @@
             } else if (type === 'EXTRA_LIFE') {
                 if (lives < 6) lives++;
                 updateLivesUI();
-                showPowerupBanner('+1 HEART RESTORED!', '#ff3366');
-                setTimeout(() => powerupBanner.classList.add('hidden'), 2000);
+                showPowerupBanner('EXTRA LIFE! +1 HEART', '#ff3366');
             } else if (type === 'DOUBLE_POINTS') {
                 hasDoublePoints = true;
-                powerupMaxTime = 350;
-                powerupTimeLeft = powerupMaxTime;
-                showPowerupBanner('DOUBLE POINTS 2X ACTIVE!', '#39ff14');
+                setTimeout(() => { hasDoublePoints = false; }, 10000);
+                showPowerupBanner('2X POINTS ACTIVE!', '#39ff14');
             }
+            setTimeout(() => powerupBanner.classList.add('hidden'), 2000);
         }
 
-        function showPowerupBanner(title, color) {
+        function showPowerupBanner(text, color) {
+            powerupTitle.textContent = text;
+            powerupTitle.style.color = color;
             powerupBanner.classList.remove('hidden');
             powerupBanner.classList.add('flex');
-            powerupTitle.textContent = title;
-            powerupTitle.style.color = color;
-            powerupBar.style.backgroundColor = color;
-            powerupBar.style.width = '100%';
         }
 
-        let letterSpawnTimer = 0;
+        // ==========================================
+        // GAME LOOP & COLLISION DETECTION
+        // ==========================================
+        let lastTime = 0;
+        let hazardSpawnTimer = 0;
         let powerupSpawnTimer = 0;
+        let frameCounter = 0;
 
-        function spawnHazards() {
-            letterSpawnTimer++;
-            powerupSpawnTimer++;
+        function checkCollisions() {
+            const playerRect = { x: player.x, y: player.y, width: player.width, height: player.height };
 
-            const spawnInterval = Math.max(14, 50 - currentLevel * 4);
-            if (letterSpawnTimer >= spawnInterval) {
-                letterSpawnTimer = 0;
-                
-                const rollingCount = letters.filter(l => l.type === 'ROLLING').length;
-                const fallingCount = letters.filter(l => l.type === 'FALLING' || l.type === 'BOSS_TARGET').length;
+            // Check hazards collision
+            for (let i = letters.length - 1; i >= 0; i--) {
+                const hazard = letters[i];
+                const circle = hazard.getBounds();
 
-                let isRolling = Math.random() < 0.35;
+                if (checkCollisionCircleRect(circle, playerRect)) {
+                    if (player.isDashing || player.invincibleTimer > 0) {
+                        createParticles(hazard.x, hazard.y, hazard.color, 12);
+                        addScore(50);
+                        letters.splice(i, 1);
+                        continue;
+                    }
 
-                if (isRolling && rollingCount >= 3) {
-                    isRolling = false;
+                    if (hasShield) {
+                        hasShield = false;
+                        soundFX.playPowerup();
+                        powerupBanner.classList.add('hidden');
+                        createParticles(hazard.x, hazard.y, '#00f3ff', 15);
+                        letters.splice(i, 1);
+                        player.invincibleTimer = 60;
+                        continue;
+                    }
+
+                    // Hit! Reduce lives & update HUD
+                    lives--;
+                    resetCombo();
+                    updateLivesUI();
+                    soundFX.playHit();
+                    triggerScreenShake(8, 12);
+                    player.invincibleTimer = 120;
+                    createParticles(player.x + player.width / 2, player.y + player.height / 2, '#ff0055', 20);
+                    letters.splice(i, 1);
+
+                    if (lives <= 0) {
+                        gameOver();
+                    }
+                    break;
                 }
-
-                if (!isRolling && isBossActive && fallingCount >= 5) {
-                    return; 
-                }
-
-                letters.push(new LetterHazard(isRolling ? 'ROLLING' : 'FALLING'));
             }
 
-            if (powerupSpawnTimer >= 350) {
-                powerupSpawnTimer = 0;
-                powerups.push(new PowerupOrb());
+            // Check powerups collision
+            for (let i = powerups.length - 1; i >= 0; i--) {
+                const p = powerups[i];
+                const circle = { x: p.x, y: p.y, radius: p.radius };
+                if (checkCollisionCircleRect(circle, playerRect)) {
+                    activatePowerup(p.type);
+                    powerups.splice(i, 1);
+                }
             }
-        }
-
-        function initGame() {
-            score = 0;
-            coins = 0;
-            updateCoins(0);
-            lives = 6;
-            combo = 0;
-            gameTime = 0;
-            currentLevel = 1;
-            levelProgress = 0;
-            levelTargetPoints = 1200;
-            scoreMultiplier = 1.0;
-            if (currentPetId === 'pet_bot') scoreMultiplier += 0.5;
-            isBossActive = false;
-            bossInstance = null;
-            isPaused = false;
-            petSkillTimer = 0;
-
-            skillCooldowns = { 1: 0, 2: 0, 3: 0 };
-            letters = [];
-            powerups = [];
-            particles = [];
-            plasmaSlashes = [];
-            hasShield = false;
-            hasDoublePoints = false;
-            activePowerup = null;
-
-            player.reset();
-            updateLivesUI();
-
-            scoreValEl.textContent = '000000';
-            levelBadgeEl.textContent = 'LVL 1';
-            levelProgressBar.style.width = '0%';
-            multiplierBadgeEl.textContent = `${scoreMultiplier.toFixed(1)}x MULTI`;
-            modalOverlay.classList.add('opacity-0', 'pointer-events-none');
-            pauseModal.classList.add('hidden');
-            powerupBanner.classList.add('hidden');
-            bossHud.classList.add('hidden');
-            bossSkillsHud.classList.add('hidden');
-
-            isGameRunning = true;
-            lastTime = performance.now();
-            requestAnimationFrame(gameLoop);
         }
 
         function gameOver() {
             isGameRunning = false;
             soundFX.playHit();
-            bossSkillsHud.classList.add('hidden');
-
-            coins = 0;
-            updateCoins(0);
+            triggerScreenShake(15, 25);
 
             if (score > highScore) {
                 highScore = score;
@@ -1761,280 +2064,332 @@
             finalLevelEl.textContent = `MAX LEVEL: ${currentLevel}`;
             scoreSummary.classList.remove('hidden');
             scoreSummary.classList.add('flex');
-
             modalTitle.textContent = "GAME OVER";
-            modalSubtitle.textContent = "Your cute kitty runner ran out of lives!";
-            startBtn.textContent = "RETRY RUN";
-
+            modalSubtitle.textContent = "Kitty-Bot got overwhelmed by the neon storm!";
+            startBtn.textContent = "PLAY AGAIN";
             modalOverlay.classList.remove('opacity-0', 'pointer-events-none');
         }
 
-        let lastTime = 0;
+        function startGame() {
+            soundFX.init();
+            modalOverlay.classList.add('opacity-0', 'pointer-events-none');
+            score = 0;
+            lives = 6;
+            combo = 0;
+            currentLevel = 1;
+            levelProgress = 0;
+            levelTargetPoints = 1200;
+            gameTime = 0;
+            isBossActive = false;
+            bossInstance = null;
+            letters = [];
+            powerups = [];
+            particles = [];
+            hasShield = false;
+            activePowerup = null;
 
-        function gameLoop(now) {
-            if (!isGameRunning) return;
-            if (isPaused) return;
+            scoreValEl.textContent = '000000';
+            levelBadgeEl.textContent = 'LVL 1';
+            levelProgressBar.style.width = '0%';
+            bossHud.classList.add('hidden');
+            bossSkillsHud.classList.add('hidden');
+            powerupBanner.classList.add('hidden');
 
-            const dt = (now - lastTime) / 1000;
-            lastTime = now;
-            gameTime += dt;
-
-            // Ad pet active skill every 10 seconds (600 frames at 60fps)
-            const activePetObj = PETS.find(p => p.id === currentPetId);
-            if (activePetObj && activePetObj.type === 'ad') {
-                petSkillTimer++;
-                if (petSkillTimer >= 600) {
-                    petSkillTimer = 0;
-                    triggerAdPetSkill();
-                }
-            } else if (activePetObj && activePetObj.type === 'coin') {
-                triggerCoinPetPassive(gameTime * 60);
-            }
-
-            for (let id in skillCooldowns) {
-                if (skillCooldowns[id] > 0) {
-                    skillCooldowns[id]--;
-                    const cdEl = document.getElementById(`cooldown-${id}`);
-                    if (cdEl) {
-                        const secondsLeft = (skillCooldowns[id] / 60).toFixed(1);
-                        cdEl.textContent = `${secondsLeft}s`;
-                    }
-                } else {
-                    const cdEl = document.getElementById(`cooldown-${id}`);
-                    if (cdEl) cdEl.textContent = 'READY';
-                }
-            }
-
-            const groundY = window.innerHeight - 80;
-
-            let slowMotionFactor = 1.0;
-            if (hasDoublePoints) {
-                powerupTimeLeft -= 1;
-                powerupBar.style.width = `${(powerupTimeLeft / powerupMaxTime) * 100}%`;
-                if (powerupTimeLeft <= 0) {
-                    hasDoublePoints = false;
-                    powerupBanner.classList.add('hidden');
-                }
-            }
-
-            spawnHazards();
-            player.update(groundY);
-            petCompanion.update();
-
-            if (isBossActive && bossInstance) bossInstance.update();
-
-            for (let i = letters.length - 1; i >= 0; i--) {
-                const letter = letters[i];
-                letter.update(slowMotionFactor);
-
-                if (letter.type === 'FALLING' && letter.y > groundY + 40) {
-                    const coinGain = letter.isMegaElite ? 10 : (letter.isSuperElite ? 5 : (letter.isElite ? 3 : (Math.random() < 0.5 ? 1 : 2)));
-                    updateCoins(coinGain);
-                    addScore(letter.isMegaElite ? 1000 : (letter.isSuperElite ? 400 : (letter.isRainbow ? 150 : (coinGain * 15))));
-                    letters.splice(i, 1);
-                    continue;
-                }
-                if (letter.type === 'ROLLING' && (letter.x < -80 || letter.x > window.innerWidth + 80)) {
-                    const coinGain = Math.random() < 0.5 ? 1 : 2;
-                    updateCoins(coinGain);
-                    addScore(letter.isRainbow ? 200 : (coinGain * 20));
-                    letters.splice(i, 1);
-                    continue;
-                }
-
-                const bounds = letter.getBounds();
-                if (checkCollisionCircleRect(bounds, player)) {
-                    createParticles(letter.x, letter.y, letter.color, 25);
-                    triggerScreenShake(8, 12);
-                    letters.splice(i, 1);
-
-                    if (player.invincibleTimer > 0) {
-                        continue;
-                    }
-
-                    if (hasShield) {
-                        hasShield = false;
-                        activePowerup = null;
-                        soundFX.playPowerup();
-                        powerupBanner.classList.add('hidden');
-                    } else {
-                        lives--;
-                        resetCombo();
-                        updateLivesUI();
-                        soundFX.playHit();
-                        player.invincibleTimer = 180;
-                        if (lives <= 0) {
-                            gameOver();
-                            return;
-                        }
-                    }
-                }
-            }
-
-            for (let i = powerups.length - 1; i >= 0; i--) {
-                const orb = powerups[i];
-                orb.update(groundY);
-                if (orb.toRemove) {
-                    powerups.splice(i, 1);
-                    continue;
-                }
-                if (checkCollisionCircleRect({ x: orb.x, y: orb.y, radius: orb.radius }, player)) {
-                    activatePowerup(orb.type);
-                    createParticles(orb.x, orb.y, orb.color, 20);
-                    powerups.splice(i, 1);
-                }
-            }
-
-            for (let i = particles.length - 1; i >= 0; i--) {
-                const p = particles[i];
-                p.x += p.vx; p.y += p.vy; p.alpha -= 0.03;
-                if (p.alpha <= 0) particles.splice(i, 1);
-            }
-
-            for (let i = plasmaSlashes.length - 1; i >= 0; i--) {
-                const ps = plasmaSlashes[i];
-                ps.progress++;
-                if (ps.progress >= ps.maxProgress) {
-                    plasmaSlashes.splice(i, 1);
-                }
-            }
-
-            ctx.save();
-            if (screenShakeTime > 0) {
-                screenShakeTime--;
-                ctx.translate((Math.random() - 0.5) * screenShakeIntensity, (Math.random() - 0.5) * screenShakeIntensity);
-            }
-
-            ctx.fillStyle = isBossActive ? '#12040a' : '#05050d';
-            ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
-
-            ctx.beginPath();
-            ctx.moveTo(0, groundY);
-            ctx.lineTo(window.innerWidth, groundY);
-            ctx.strokeStyle = isBossActive ? '#ff0055' : '#00f3ff';
-            ctx.lineWidth = 3;
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = ctx.strokeStyle;
-            ctx.stroke();
-
-            ctx.shadowBlur = 0;
-            const gridSpacing = 40;
-            for (let x = 0; x < window.innerWidth; x += gridSpacing) {
-                ctx.beginPath();
-                ctx.moveTo(x, groundY);
-                ctx.lineTo(x + (x - window.innerWidth / 2) * 0.5, window.innerHeight);
-                ctx.strokeStyle = 'rgba(0, 243, 255, 0.08)';
-                ctx.stroke();
-            }
-
-            powerups.forEach(p => p.draw(ctx));
-            letters.forEach(l => l.draw(ctx));
-            if (isBossActive && bossInstance) bossInstance.draw(ctx);
-            player.draw(ctx);
-            petCompanion.draw(ctx);
-
-            plasmaSlashes.forEach(ps => {
-                ctx.save();
-                const t = ps.progress / ps.maxProgress;
-                const currentX = ps.x + (ps.targetX - ps.x) * t;
-                const currentY = ps.y + (ps.targetY - ps.y) * t;
-
-                ctx.strokeStyle = '#00f3ff';
-                ctx.lineWidth = 7 * (1 - t);
-                ctx.shadowBlur = 35;
-                ctx.shadowColor = '#00f3ff';
-
-                ctx.beginPath();
-                ctx.arc(currentX, currentY, 90 * t, 0, Math.PI * 2);
-                ctx.stroke();
-
-                ps.arcs.forEach(arc => {
-                    ctx.strokeStyle = '#ff00ff';
-                    ctx.lineWidth = 3.5;
-                    ctx.beginPath();
-                    const angle = t * Math.PI * 4 * arc.speed + arc.angleOffset;
-                    ctx.arc(currentX, currentY, arc.radius * t, angle, angle + Math.PI / 2);
-                    ctx.stroke();
-                });
-
-                ctx.restore();
-            });
-
-            particles.forEach(p => {
-                ctx.save();
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fillStyle = p.color;
-                ctx.globalAlpha = Math.max(0, p.alpha);
-                ctx.shadowBlur = 8;
-                ctx.shadowColor = p.color;
-                ctx.fill();
-                ctx.restore();
-            });
-
-            ctx.restore();
+            updateLivesUI();
+            player.reset();
+            isGameRunning = true;
+            isPaused = false;
+            lastTime = performance.now();
             requestAnimationFrame(gameLoop);
+            updateQuestProgress('runs', 1);
         }
 
+        startBtn.addEventListener('click', startGame);
+
+        // ==========================================
+        // INPUT HANDLING (KEYBOARD & MOBILE TOUCH)
+        // ==========================================
         window.addEventListener('keydown', (e) => {
-            soundFX.init();
-            if (e.code === 'Escape') {
-                togglePause();
-                return;
-            }
-            if (isBossActive) {
-                if (e.code === 'Digit1' || e.code === 'Numpad1') useBossSkill(1);
-                if (e.code === 'Digit2' || e.code === 'Numpad2') useBossSkill(2);
-                if (e.code === 'Digit3' || e.code === 'Numpad3') useBossSkill(3);
-            }
-            if (e.code === 'KeyA' || e.code === 'ArrowLeft') keys.left = true;
-            if (e.code === 'KeyD' || e.code === 'ArrowRight') keys.right = true;
-            if (e.code === 'KeyW' || e.code === 'ArrowUp') keys.jump = true;
-            if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
-                if (!keys.dash) keys.dash = true;
-            }
+            if (!isGameRunning || isPaused) return;
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = true;
+            if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = true;
+            if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') keys.jump = true;
+            if (e.key === 'Shift') keys.dash = true;
+            if (e.key === '1') useBossSkill(1);
+            if (e.key === '2') useBossSkill(2);
+            if (e.key === '3') useBossSkill(3);
         });
 
         window.addEventListener('keyup', (e) => {
-            if (e.code === 'KeyA' || e.code === 'ArrowLeft') keys.left = false;
-            if (e.code === 'KeyD' || e.code === 'ArrowRight') keys.right = false;
-            if (e.code === 'KeyW' || e.code === 'ArrowUp') {
-                keys.jump = false;
-                jumpKeyWasPressed = false;
-            }
-            if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') keys.dash = false;
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = false;
+            if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = false;
+            if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') keys.jump = false;
+            if (e.key === 'Shift') keys.dash = false;
         });
 
-        document.getElementById('skill-1-btn').addEventListener('click', () => useBossSkill(1));
-        document.getElementById('skill-2-btn').addEventListener('click', () => useBossSkill(2));
-        document.getElementById('skill-3-btn').addEventListener('click', () => useBossSkill(3));
-
+        // Mobile On-Screen Controls
         const btnLeft = document.getElementById('btn-left');
         const btnRight = document.getElementById('btn-right');
         const btnJump = document.getElementById('btn-jump');
         const btnDash = document.getElementById('btn-dash');
 
-        function bindTouchBtn(btn, keyProp) {
-            btn.addEventListener('touchstart', (e) => { e.preventDefault(); soundFX.init(); keys[keyProp] = true; });
-            btn.addEventListener('touchend', (e) => { 
-                e.preventDefault(); 
-                keys[keyProp] = false; 
-                if(keyProp === 'jump') jumpKeyWasPressed = false;
-            });
-            btn.addEventListener('mousedown', () => { soundFX.init(); keys[keyProp] = true; });
-            btn.addEventListener('mouseup', () => { keys[keyProp] = false; if(keyProp === 'jump') jumpKeyWasPressed = false; });
-            btn.addEventListener('mouseleave', () => { keys[keyProp] = false; if(keyProp === 'jump') jumpKeyWasPressed = false; });
+        if (btnLeft) {
+            btnLeft.addEventListener('touchstart', (e) => { e.preventDefault(); keys.left = true; });
+            btnLeft.addEventListener('touchend', (e) => { e.preventDefault(); keys.left = false; });
+            btnLeft.addEventListener('mousedown', () => { keys.left = true; });
+            btnLeft.addEventListener('mouseup', () => { keys.left = false; });
+        }
+        if (btnRight) {
+            btnRight.addEventListener('touchstart', (e) => { e.preventDefault(); keys.right = true; });
+            btnRight.addEventListener('touchend', (e) => { e.preventDefault(); keys.right = false; });
+            btnRight.addEventListener('mousedown', () => { keys.right = true; });
+            btnRight.addEventListener('mouseup', () => { keys.right = false; });
+        }
+        if (btnJump) {
+            btnJump.addEventListener('touchstart', (e) => { e.preventDefault(); keys.jump = true; });
+            btnJump.addEventListener('touchend', (e) => { e.preventDefault(); keys.jump = false; });
+            btnJump.addEventListener('mousedown', () => { keys.jump = true; });
+            btnJump.addEventListener('mouseup', () => { keys.jump = false; });
+        }
+        if (btnDash) {
+            btnDash.addEventListener('touchstart', (e) => { e.preventDefault(); keys.dash = true; });
+            btnDash.addEventListener('touchend', (e) => { e.preventDefault(); keys.dash = false; });
+            btnDash.addEventListener('mousedown', () => { keys.dash = true; });
+            btnDash.addEventListener('mouseup', () => { keys.dash = false; });
         }
 
-        bindTouchBtn(btnLeft, 'left');
-        bindTouchBtn(btnRight, 'right');
-        bindTouchBtn(btnJump, 'jump');
-        bindTouchBtn(btnDash, 'dash');
+        // Tap to Jump & Slide to Dodge on Mobile Canvas
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchStartTime = 0;
 
-        startBtn.addEventListener('click', () => {
-            soundFX.init();
-            initGame();
-        });
+        canvas.addEventListener('touchstart', (e) => {
+            if (!isGameRunning || isPaused) return;
+            if (e.touches.length === 1) {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+                touchStartTime = performance.now();
+            }
+        }, { passive: true });
+
+        canvas.addEventListener('touchend', (e) => {
+            if (!isGameRunning || isPaused) return;
+            if (e.changedTouches.length === 1) {
+                const touchEndX = e.changedTouches[0].clientX;
+                const touchEndY = e.changedTouches[0].clientY;
+                const deltaX = touchEndX - touchStartX;
+                const deltaY = touchEndY - touchStartY;
+                const deltaTime = performance.now() - touchStartTime;
+
+                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+                // Swipe / Slide gesture for dodge (dash)
+                if (distance > 35 && deltaTime < 400) {
+                    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                        // Horizontal swipe -> Dash left or right
+                        keys.dash = true;
+                        keys.left = deltaX < 0;
+                        keys.right = deltaX > 0;
+                        setTimeout(() => { keys.dash = false; keys.left = false; keys.right = false; }, 150);
+                    } else if (deltaY > 25) {
+                        // Swipe Down -> Slide / Dash
+                        keys.dash = true;
+                        setTimeout(() => { keys.dash = false; }, 150);
+                    } else if (deltaY < -25) {
+                        // Swipe Up -> Jump
+                        keys.jump = true;
+                        setTimeout(() => { keys.jump = false; }, 100);
+                    }
+                } else if (distance < 20 && deltaTime < 300) {
+                    // Tap -> Tap to Jump
+                    keys.jump = true;
+                    setTimeout(() => { keys.jump = false; }, 100);
+                }
+            }
+        }, { passive: true });
+
+        // Skill buttons listeners for boss combat
+        const skill1Btn = document.getElementById('skill-1-btn');
+        const skill2Btn = document.getElementById('skill-2-btn');
+        const skill3Btn = document.getElementById('skill-3-btn');
+
+        if (skill1Btn) skill1Btn.addEventListener('click', () => useBossSkill(1));
+        if (skill2Btn) skill2Btn.addEventListener('click', () => useBossSkill(2));
+        if (skill3Btn) skill3Btn.addEventListener('click', () => useBossSkill(3));
+
+        // ==========================================
+        // MAIN GAME LOOP
+        // ==========================================
+        function gameLoop(timestamp) {
+            if (!isGameRunning || isPaused) return;
+
+            const dt = timestamp - lastTime;
+            lastTime = timestamp;
+            gameTime++;
+
+            Object.keys(skillCooldowns).forEach(k => {
+                if (skillCooldowns[k] > 0) {
+                    skillCooldowns[k]--;
+                    const cdEl = document.getElementById(`cooldown-${k}`);
+                    if (cdEl) cdEl.textContent = skillCooldowns[k] === 0 ? 'READY' : `${Math.ceil(skillCooldowns[k] / 60)}s`;
+                }
+            });
+
+            petSkillTimer++;
+            if (petSkillTimer >= 600) {
+                petSkillTimer = 0;
+                const petData = PETS.find(p => p.id === currentPetId);
+                if (petData && petData.type === 'ad') {
+                    triggerAdPetSkill();
+                }
+            }
+            triggerCoinPetPassive(gameTime);
+
+            ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+            ctx.save();
+            if (screenShakeTime > 0) {
+                const offsetX = (Math.random() - 0.5) * screenShakeIntensity;
+                const offsetY = (Math.random() - 0.5) * screenShakeIntensity;
+                ctx.translate(offsetX, offsetY);
+                screenShakeTime--;
+            }
+
+            // Draw Cyber Grid Background
+            ctx.strokeStyle = 'rgba(0, 243, 255, 0.05)';
+            ctx.lineWidth = 1;
+            const gridSize = 50;
+            const gridOffset = (gameTime * 0.8) % gridSize;
+            for (let x = 0; x < window.innerWidth; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, window.innerHeight);
+                ctx.stroke();
+            }
+            for (let y = gridOffset; y < window.innerHeight; y += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(window.innerWidth, y);
+                ctx.stroke();
+            }
+
+            // Ground Line
+            const groundY = window.innerHeight - 80;
+            ctx.strokeStyle = '#00f3ff';
+            ctx.lineWidth = 4;
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = '#00f3ff';
+            ctx.beginPath();
+            ctx.moveTo(0, groundY);
+            ctx.lineTo(window.innerWidth, groundY);
+            ctx.stroke();
+
+            // Spawn Hazards
+            hazardSpawnTimer++;
+            const spawnInterval = Math.max(35, 90 - (currentLevel - 1) * 8);
+            if (!isBossActive && hazardSpawnTimer >= spawnInterval) {
+                hazardSpawnTimer = 0;
+                const hazardType = Math.random() > 0.4 ? 'FALLING' : 'ROLLING';
+                letters.push(new LetterHazard(hazardType));
+            }
+
+            // Spawn Powerups
+            powerupSpawnTimer++;
+            if (powerupSpawnTimer >= 700) {
+                powerupSpawnTimer = 0;
+                if (Math.random() < 0.75) {
+                    powerups.push(new PowerupOrb());
+                }
+            }
+
+            // Update & Draw Hazards
+            for (let i = letters.length - 1; i >= 0; i--) {
+                const hazard = letters[i];
+                hazard.update(1.0);
+                hazard.draw(ctx);
+
+                if (hazard.y > window.innerHeight + 100 || hazard.x < -100 || hazard.x > window.innerWidth + 100) {
+                    letters.splice(i, 1);
+                    addScore(15);
+                }
+            }
+
+            // Update & Draw Powerups
+            for (let i = powerups.length - 1; i >= 0; i--) {
+                const p = powerups[i];
+                p.update(groundY);
+                p.draw(ctx);
+                if (p.toRemove) {
+                    powerups.splice(i, 1);
+                }
+            }
+
+            // Boss update & draw
+            if (isBossActive && bossInstance) {
+                bossInstance.update();
+                bossInstance.draw(ctx);
+            }
+
+            // Update & Draw Player
+            player.update(groundY);
+            player.draw(ctx);
+
+            // Update & Draw Pet Companion
+            petCompanion.update();
+            petCompanion.draw(ctx);
+
+            // Plasma Slashes animation draw
+            for (let i = plasmaSlashes.length - 1; i >= 0; i--) {
+                const ps = plasmaSlashes[i];
+                ps.progress++;
+                ctx.save();
+                ctx.strokeStyle = '#00f3ff';
+                ctx.lineWidth = 4;
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = '#00f3ff';
+                ctx.beginPath();
+                ctx.moveTo(ps.x, ps.y);
+                const t = ps.progress / ps.maxProgress;
+                const currX = ps.x + (ps.targetX - ps.x) * t;
+                const currY = ps.y + (ps.targetY - ps.y) * t;
+                ctx.lineTo(currX, currY);
+                ctx.stroke();
+                ctx.restore();
+
+                if (ps.progress >= ps.maxProgress) {
+                    plasmaSlashes.splice(i, 1);
+                }
+            }
+
+            // Update & Draw Particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const pt = particles[i];
+                pt.x += pt.vx;
+                pt.y += pt.vy;
+                pt.alpha -= 0.03;
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2);
+                ctx.fillStyle = pt.color;
+                ctx.globalAlpha = Math.max(0, pt.alpha);
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = pt.color;
+                ctx.fill();
+                ctx.restore();
+
+                if (pt.alpha <= 0) particles.splice(i, 1);
+            }
+
+            ctx.restore();
+
+            // Check Collisions
+            checkCollisions();
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        updateLivesUI();
     </script>
 </body>
 </html>
