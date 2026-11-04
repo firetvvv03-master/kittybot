@@ -418,6 +418,14 @@
         let hasSingularity = false;
         let plasmaSlashes = [];
 
+        // Helper to check for mobile / touch layout
+        function getMobileMaxRollingHazards() {
+            const width = window.innerWidth;
+            if (width <= 640) return 1;       // Mobile portrait / small screens: max 1
+            if (width <= 768) return 2;       // Mobile landscape / tablet: max 2
+            return 3;                         // Desktop: max 3
+        }
+
         // 15 Kitty Skins
         const SKINS = [
             { id: 'cyber', name: 'Cyber Kitty', type: 'free', cost: 0, color: '#00f3ff', core: '#ffffff', ear: '#00f3ff' },
@@ -1424,9 +1432,10 @@
                     const fromLeft = Math.random() > 0.5;
                     this.x = fromLeft ? -50 : window.innerWidth + 50;
                     this.y = window.innerHeight - 100 - this.size / 2;
-                    this.vx = (fromLeft ? 1 : -1) * (Math.random() * 3 + 4.5) * rollingSpeedScale;
+                    // Reduced base rolling speed by 35% for smoother mobile and desktop dodging
+                    this.vx = (fromLeft ? 1 : -1) * ((Math.random() * 3 + 4.5) * 0.65) * rollingSpeedScale;
                     this.vy = 0;
-                    this.rotSpeed = (fromLeft ? 1 : -1) * 0.18;
+                    this.rotSpeed = (fromLeft ? 1 : -1) * 0.12;
                 } else if (this.type === 'BOSS_TARGET') {
                     this.x = customVx.startX;
                     this.y = customVx.startY;
@@ -1543,7 +1552,8 @@
 
                 if (this.attackTimer % 180 === 0 && !this.laserState.active) {
                     const rollingCount = letters.filter(l => l.type === 'ROLLING').length;
-                    if (rollingCount < 3) letters.push(new LetterHazard('ROLLING', '👾'));
+                    const maxRolling = getMobileMaxRollingHazards();
+                    if (rollingCount < maxRolling) letters.push(new LetterHazard('ROLLING', '👾'));
                 }
 
                 if (this.attackTimer % 320 === 0) {
@@ -1574,13 +1584,7 @@
                                     soundFX.playPowerup();
                                     powerupBanner.classList.add('hidden');
                                 } else {
-                                    lives--;
-                                    resetCombo();
-                                    updateLivesUI();
-                                    soundFX.playHit();
-                                    triggerScreenShake(10, 15);
-                                    player.invincibleTimer = 180;
-                                    if (lives <= 0) gameOver();
+                                    takeDamage(1);
                                 }
                             }
                         }
@@ -2071,11 +2075,37 @@
             if (comboCountEl) comboCountEl.style.opacity = '0';
         }
 
+        function takeDamage(amount = 1) {
+            if (player.invincibleTimer > 0) return;
+
+            if (hasShield) {
+                hasShield = false;
+                activePowerup = null;
+                soundFX.playPowerup();
+                powerupBanner.classList.add('hidden');
+                player.invincibleTimer = 60; // Brief grace period after shield breaks
+                return;
+            }
+
+            lives = Math.max(0, lives - amount);
+            resetCombo();
+            updateLivesUI();
+            soundFX.playHit();
+            triggerScreenShake(10, 15);
+            player.invincibleTimer = 180;
+
+            if (lives <= 0) {
+                gameOver();
+            }
+        }
+
         function updateLivesUI() {
+            lives = Math.max(0, Math.min(6, lives));
             livesContainerEl.innerHTML = '';
             for (let i = 0; i < 6; i++) {
                 const heart = document.createElement('span');
-                heart.className = `text-sm sm:text-base md:text-lg transition-all duration-300 ${i < lives ? 'text-rose-500 drop-shadow-[0_0_8px_rgba(244,63,94,0.8)]' : 'text-gray-700'}`;
+                const isFilled = i < lives;
+                heart.className = `text-sm sm:text-base md:text-lg transition-all duration-300 ${isFilled ? 'text-rose-500 drop-shadow-[0_0_8px_rgba(244,63,94,0.8)] scale-100' : 'text-gray-700/60 scale-90'}`;
                 heart.textContent = '♥';
                 livesContainerEl.appendChild(heart);
             }
@@ -2096,9 +2126,14 @@
                 showPowerupBanner('COIN FRENZY! +50 COINS & 1000 PTS', '#ffd700');
                 setTimeout(() => powerupBanner.classList.add('hidden'), 2500);
             } else if (type === 'EXTRA_LIFE') {
-                if (lives < 6) lives++;
-                updateLivesUI();
-                showPowerupBanner('+1 HEART RESTORED!', '#ff3366');
+                if (lives < 6) {
+                    lives = Math.min(6, lives + 1);
+                    updateLivesUI();
+                    showPowerupBanner('+1 HEART RESTORED!', '#ff3366');
+                } else {
+                    addScore(500);
+                    showPowerupBanner('MAX LIVES! +500 PTS', '#ff3366');
+                }
                 setTimeout(() => powerupBanner.classList.add('hidden'), 2000);
             } else if (type === 'DOUBLE_POINTS') {
                 hasDoublePoints = true;
@@ -2134,8 +2169,9 @@
                 const rollingCount = letters.filter(l => l.type === 'ROLLING').length;
                 const fallingCount = letters.filter(l => l.type === 'FALLING' || l.type === 'BOSS_TARGET').length;
 
+                const maxRolling = getMobileMaxRollingHazards();
                 let isRolling = Math.random() < 0.35;
-                if (isRolling && rollingCount >= 3) isRolling = false;
+                if (isRolling && rollingCount >= maxRolling) isRolling = false;
                 if (!isRolling && isBossActive && fallingCount >= 5) return;
 
                 letters.push(new LetterHazard(isRolling ? 'ROLLING' : 'FALLING'));
@@ -2350,26 +2386,11 @@
                 const bounds = letter.getBounds();
                 if (checkCollisionCircleRect(bounds, player)) {
                     createParticles(letter.x, letter.y, letter.color, 15);
-                    triggerScreenShake(8, 12);
                     letters.splice(i, 1);
 
-                    if (player.invincibleTimer > 0) continue;
-
-                    if (hasShield) {
-                        hasShield = false;
-                        activePowerup = null;
-                        soundFX.playPowerup();
-                        powerupBanner.classList.add('hidden');
-                    } else {
-                        lives--;
-                        resetCombo();
-                        updateLivesUI();
-                        soundFX.playHit();
-                        player.invincibleTimer = 180;
-                        if (lives <= 0) {
-                            gameOver();
-                            return;
-                        }
+                    if (player.invincibleTimer <= 0) {
+                        takeDamage(1);
+                        if (lives <= 0) return;
                     }
                 }
             }
