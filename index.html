@@ -11,13 +11,15 @@
       user-select: none;
       -webkit-user-select: none;
       box-sizing: border-box;
+      -webkit-touch-callout: none;
     }
     body {
       font-family: 'Nunito', sans-serif;
       background-color: #080c14;
       color: #f3f4f6;
-      overflow-x: hidden;
-      touch-action: manipulation;
+      overflow: hidden;
+      overscroll-behavior: none;
+      touch-action: none;
     }
     .font-fredoka {
       font-family: 'Fredoka One', cursive;
@@ -86,11 +88,11 @@
     }
   </style>
 </head>
-<body class="min-h-screen w-full flex flex-col justify-between items-center p-2 sm:p-3 bg-slate-950 text-white relative">
+<body class="h-screen w-screen flex flex-col justify-between items-center p-2 sm:p-3 bg-slate-950 text-white relative overflow-hidden">
 
   <!-- Background Ambient Glows -->
-  <div class="absolute -top-32 -left-32 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
-  <div class="absolute -bottom-32 -right-32 w-96 h-96 bg-fuchsia-500/10 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="absolute -top-32 -left-32 w-96 h-96 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="absolute -bottom-32 -right-32 w-96 h-96 bg-fuchsia-500/15 rounded-full blur-3xl pointer-events-none"></div>
 
   <!-- AD OVERLAY MODAL SIMULATOR -->
   <div id="ad-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
@@ -168,7 +170,7 @@
   </div>
 
   <!-- Top Header / HUD -->
-  <header class="w-full max-w-4xl flex flex-col gap-1 z-10 bg-slate-900/90 backdrop-blur-md px-3 sm:px-5 py-2 rounded-2xl border border-slate-800 shadow-2xl mb-1">
+  <header class="w-full max-w-4xl flex flex-col gap-1 z-10 bg-slate-900/90 backdrop-blur-md px-3 sm:px-5 py-2 rounded-2xl border border-slate-800 shadow-2xl shrink-0">
     <div class="flex items-center justify-between">
       <!-- Stats Left -->
       <div class="flex items-center space-x-2 sm:space-x-4">
@@ -230,72 +232,72 @@
     </div>
   </header>
 
-  <!-- Central Play Area: Full-width Maze Canvas -->
-  <div id="game-layout" class="w-full max-w-4xl flex flex-col items-center justify-center gap-2 my-1">
+  <!-- Central Play Area: Full-width Maze Canvas & Powerups -->
+  <div id="game-layout" class="w-full max-w-4xl flex flex-col items-center justify-center gap-1.5 my-auto shrink-0">
     
     <!-- Game Canvas Container -->
     <main id="canvas-wrapper" class="relative w-full flex items-center justify-center min-w-0">
-      <canvas id="gameCanvas" class="rounded-2xl border-2 border-cyan-500/30 shadow-2xl bg-slate-900/90 max-w-full max-h-[58vh] object-contain cursor-pointer"></canvas>
+      <canvas id="gameCanvas" class="rounded-2xl border-2 border-cyan-500/30 shadow-2xl bg-slate-900/90 max-w-full max-h-[48vh] object-contain cursor-pointer"></canvas>
       
       <!-- Status Overlay Banner -->
-      <div id="instruction-tip" class="absolute top-3 left-1/2 -translate-x-1/2 bg-slate-900/90 backdrop-blur-md px-4 py-1.5 rounded-full border border-cyan-500/40 text-xs font-semibold text-cyan-200 shadow-lg pointer-events-none transition-all duration-300 flex items-center space-x-2">
+      <div id="instruction-tip" class="absolute top-2 left-1/2 -translate-x-1/2 bg-slate-900/90 backdrop-blur-md px-3 py-1 rounded-full border border-cyan-500/40 text-[11px] font-semibold text-cyan-200 shadow-lg pointer-events-none transition-all duration-300 flex items-center space-x-1.5">
         <span id="tip-icon">💡</span>
         <span id="tip-text">Select cards to queue moves, then press RUN!</span>
       </div>
     </main>
 
-    <!-- Bottom Power-Up / Leap Deck Bar (Moved from right side to below canvas) -->
-    <aside class="w-full bg-slate-900/90 backdrop-blur-md border border-amber-500/40 rounded-2xl p-2 flex flex-col shadow-xl">
-      <div class="flex items-center justify-between pb-1 mb-1.5 border-b border-amber-500/30 px-1">
-        <h2 class="font-fredoka text-xs sm:text-sm text-amber-400 tracking-wide flex items-center space-x-1.5">
+    <!-- Bottom Power-Up / Leap Deck Bar -->
+    <aside class="w-full bg-slate-900/90 backdrop-blur-md border border-amber-500/40 rounded-2xl p-1.5 flex flex-col shadow-xl">
+      <div class="flex items-center justify-between pb-1 mb-1 border-b border-amber-500/30 px-1">
+        <h2 class="font-fredoka text-[11px] sm:text-xs text-amber-400 tracking-wide flex items-center space-x-1.5">
           <span>⚡</span>
           <span>POWER-UPS & LEAPS</span>
         </h2>
         <span class="text-[9px] text-slate-400">Click or hover for info</span>
       </div>
-      <div id="powerup-deck-container" class="flex flex-row overflow-x-auto space-x-2 pb-1 pr-1 mb-1.5 min-h-[56px] items-center">
+      <div id="powerup-deck-container" class="flex flex-row overflow-x-auto space-x-1.5 pb-1 pr-1 mb-1 min-h-[50px] items-center">
         <!-- Rendered via JS -->
       </div>
       <!-- Blue Description Box at Bottom of Panel -->
-      <div id="powerup-desc-box" class="bg-blue-950/80 border border-blue-500/60 rounded-xl p-1.5 text-[10px] text-blue-200 font-medium leading-snug shadow-inner flex items-center justify-center text-center">
+      <div id="powerup-desc-box" class="bg-blue-950/80 border border-blue-500/60 rounded-xl p-1 text-[10px] text-blue-200 font-medium leading-snug shadow-inner flex items-center justify-center text-center">
         Hover or select a power-up card to view its description here.
       </div>
     </aside>
   </div>
 
   <!-- Bottom Control Deck & Sequence Bar -->
-  <footer class="w-full max-w-4xl z-10 flex flex-col gap-1.5">
+  <footer class="w-full max-w-4xl z-10 flex flex-col gap-1.5 shrink-0 pb-1">
     
-    <!-- Movement Queue Preview Bar -->
-    <div class="w-full bg-slate-900/90 backdrop-blur-md p-2 rounded-xl border border-slate-800 flex items-center justify-between min-h-[52px]">
-      <div class="flex items-center space-x-1.5 overflow-x-auto py-1 px-1 flex-1" id="queue-container">
-        <span id="queue-empty-text" class="text-xs text-slate-500 italic pl-2">Planned cards appear here...</span>
+    <!-- 1. PLANNED CARDS QUEUE (Moved just above Run and Reroll controls) -->
+    <div class="w-full bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-cyan-500/30 flex items-center justify-between min-h-[46px] shadow-lg">
+      <div class="flex items-center space-x-1.5 overflow-x-auto py-0.5 px-1 flex-1" id="queue-container">
+        <span id="queue-empty-text" class="text-xs text-slate-500 italic pl-1">Planned cards appear here...</span>
       </div>
       
-      <!-- Control Buttons -->
+      <!-- Control Buttons (Clear, Undo, Reroll, RUN!) -->
       <div class="flex items-center space-x-1.5 pl-2 border-l border-slate-800 shrink-0">
-        <button id="undo-btn" class="px-2.5 py-2 bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold text-xs rounded-xl transition border border-amber-500/30 disabled:opacity-30 disabled:pointer-events-none" title="Undo last step">
+        <button id="undo-btn" class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold text-xs rounded-xl transition border border-amber-500/30 disabled:opacity-30 disabled:pointer-events-none" title="Undo last step">
           ↩️
         </button>
-        <button id="clear-btn" class="px-2.5 py-2 bg-slate-800 hover:bg-slate-700 text-rose-400 font-bold text-xs rounded-xl transition border border-rose-500/30 disabled:opacity-30 disabled:pointer-events-none">
+        <button id="clear-btn" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-rose-400 font-bold text-xs rounded-xl transition border border-rose-500/30 disabled:opacity-30 disabled:pointer-events-none">
           Clear
         </button>
-        <button id="reroll-btn" class="px-3 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-extrabold text-xs rounded-xl shadow-md transition transform active:scale-95 flex items-center space-x-1 disabled:opacity-40 disabled:pointer-events-none">
+        <button id="reroll-btn" class="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-extrabold text-xs rounded-xl shadow-md transition transform active:scale-95 flex items-center space-x-1 disabled:opacity-40 disabled:pointer-events-none">
           <span>🎲</span>
           <span id="reroll-text">Reroll (1)</span>
         </button>
-        <button id="execute-btn" class="px-4 sm:px-6 py-2 bg-gradient-to-r from-cyan-400 to-emerald-400 hover:from-cyan-300 hover:to-emerald-300 text-slate-950 font-fredoka text-xs sm:text-sm uppercase tracking-wider rounded-xl shadow-lg glow-cyan transition transform active:scale-95 disabled:opacity-30 disabled:pointer-events-none">
+        <button id="execute-btn" class="px-4 sm:px-5 py-1.5 bg-gradient-to-r from-cyan-400 to-emerald-400 hover:from-cyan-300 hover:to-emerald-300 text-slate-950 font-fredoka text-xs sm:text-sm uppercase tracking-wider rounded-xl shadow-lg glow-cyan transition transform active:scale-95 disabled:opacity-30 disabled:pointer-events-none">
           RUN! 🚀
         </button>
       </div>
     </div>
 
-    <!-- Movement Hand Deck Row -->
+    <!-- 2. MOVEMENT HAND DECK ROW -->
     <div class="flex flex-col gap-1 w-full">
       <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider px-1 flex justify-between">
         <span>Movement Hand</span>
       </div>
-      <div class="grid grid-cols-6 sm:grid-cols-7 gap-1.5 sm:gap-2 w-full" id="deck-container">
+      <div class="grid grid-cols-6 sm:grid-cols-7 gap-1 sm:gap-1.5 w-full" id="deck-container">
         <!-- Generated via JS -->
       </div>
     </div>
@@ -548,6 +550,10 @@
     ];
 
     let particles = [];
+
+    // Prevent default gesture panning/zooming/scrolling on mobile touch hold
+    document.addEventListener('touchmove', (e) => { e.preventDefault(); }, { passive: false });
+    document.addEventListener('gesturestart', (e) => { e.preventDefault(); });
 
     /* =========================================================================
        2. SYNTHESIZED SOUND SYSTEM (Web Audio API)
@@ -1040,7 +1046,7 @@
         }`;
         btn.onclick = () => selectCard(card);
         btn.innerHTML = `
-          <span class="text-sm sm:text-xl mb-0.5">${card.icon}</span>
+          <span class="text-sm sm:text-lg mb-0.5">${card.icon}</span>
           <span class="text-[9px] sm:text-[10px] font-bold text-cyan-200 tracking-tight leading-tight">${card.label}</span>
         `;
         deckContainer.appendChild(btn);
@@ -1052,7 +1058,7 @@
       powerupDeck.forEach((card) => {
         const isJump = card.type === 'jump';
         const btn = document.createElement('button');
-        btn.className = `card-item p-2 rounded-xl flex flex-col items-center justify-center border transition shadow-md shrink-0 w-28 sm:w-32 ${
+        btn.className = `card-item p-1.5 rounded-xl flex flex-col items-center justify-center border transition shadow-md shrink-0 w-26 sm:w-30 ${
           card.used 
             ? 'opacity-20 border-slate-800 bg-slate-900 pointer-events-none' 
             : isJump 
@@ -1069,8 +1075,8 @@
 
         btn.innerHTML = `
           <div class="flex items-center space-x-1">
-            <span class="text-sm">${card.icon}</span>
-            <span class="text-[10px] font-bold ${isJump ? 'text-cyan-300' : 'text-amber-300'} truncate">${card.label}</span>
+            <span class="text-xs sm:text-sm">${card.icon}</span>
+            <span class="text-[9px] sm:text-[10px] font-bold ${isJump ? 'text-cyan-300' : 'text-amber-300'} truncate">${card.label}</span>
           </div>
           <span class="text-[8px] text-slate-400 uppercase">${isJump ? 'Leap' : 'Power'}</span>
         `;
@@ -1094,7 +1100,7 @@
       if (plannedQueue.length === 0) {
         const emptyText = document.createElement('span');
         emptyText.id = 'queue-empty-text';
-        emptyText.className = 'text-xs text-slate-500 italic pl-2';
+        emptyText.className = 'text-xs text-slate-500 italic pl-1';
         emptyText.innerText = 'Planned cards appear here...';
         queueContainer.appendChild(emptyText);
 
@@ -2057,7 +2063,7 @@
        ========================================================================= */
     function resizeCanvas() {
       const container = CANVAS.parentElement;
-      const size = Math.min(container.clientWidth, window.innerHeight * 0.58, 620);
+      const size = Math.min(container.clientWidth, window.innerHeight * 0.48, 580);
       CANVAS.width = size; CANVAS.height = size;
       TILE_SIZE = size / GRID_SIZE;
     }
