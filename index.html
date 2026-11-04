@@ -16,7 +16,7 @@
       font-family: 'Nunito', sans-serif;
       background-color: #080c14;
       color: #f3f4f6;
-      overflow: hidden;
+      overflow-x: hidden;
       touch-action: manipulation;
     }
     .font-fredoka {
@@ -86,7 +86,7 @@
     }
   </style>
 </head>
-<body class="h-screen w-screen flex flex-col justify-between items-center p-2 sm:p-3 bg-slate-950 text-white relative overflow-hidden">
+<body class="min-h-screen w-full flex flex-col justify-between items-center p-2 sm:p-3 bg-slate-950 text-white relative">
 
   <!-- Background Ambient Glows -->
   <div class="absolute -top-32 -left-32 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -168,7 +168,7 @@
   </div>
 
   <!-- Top Header / HUD -->
-  <header class="w-full max-w-5xl flex flex-col gap-1 z-10 bg-slate-900/90 backdrop-blur-md px-3 sm:px-5 py-2 rounded-2xl border border-slate-800 shadow-2xl mb-1">
+  <header class="w-full max-w-4xl flex flex-col gap-1 z-10 bg-slate-900/90 backdrop-blur-md px-3 sm:px-5 py-2 rounded-2xl border border-slate-800 shadow-2xl mb-1">
     <div class="flex items-center justify-between">
       <!-- Stats Left -->
       <div class="flex items-center space-x-2 sm:space-x-4">
@@ -230,12 +230,12 @@
     </div>
   </header>
 
-  <!-- Central Play Area: Maze Canvas + Side Power-Up Panel -->
-  <div id="game-layout" class="w-full max-w-5xl flex-1 flex flex-row items-center justify-center gap-3 min-h-0 my-1">
+  <!-- Central Play Area: Full-width Maze Canvas -->
+  <div id="game-layout" class="w-full max-w-4xl flex flex-col items-center justify-center gap-2 my-1">
     
     <!-- Game Canvas Container -->
-    <main id="canvas-wrapper" class="relative flex-1 h-full flex items-center justify-center min-w-0">
-      <canvas id="gameCanvas" class="rounded-2xl border-2 border-cyan-500/30 shadow-2xl bg-slate-900/90 max-w-full max-h-full object-contain cursor-pointer"></canvas>
+    <main id="canvas-wrapper" class="relative w-full flex items-center justify-center min-w-0">
+      <canvas id="gameCanvas" class="rounded-2xl border-2 border-cyan-500/30 shadow-2xl bg-slate-900/90 max-w-full max-h-[58vh] object-contain cursor-pointer"></canvas>
       
       <!-- Status Overlay Banner -->
       <div id="instruction-tip" class="absolute top-3 left-1/2 -translate-x-1/2 bg-slate-900/90 backdrop-blur-md px-4 py-1.5 rounded-full border border-cyan-500/40 text-xs font-semibold text-cyan-200 shadow-lg pointer-events-none transition-all duration-300 flex items-center space-x-2">
@@ -244,24 +244,27 @@
       </div>
     </main>
 
-    <!-- Side Power-Up Panel -->
-    <aside class="w-40 sm:w-48 bg-slate-900/90 backdrop-blur-md border border-amber-500/40 rounded-2xl p-2.5 flex flex-col shrink-0 h-full max-h-[560px] shadow-xl">
-      <div class="text-center pb-2 mb-2 border-b border-amber-500/30">
-        <h2 class="font-fredoka text-xs sm:text-sm text-amber-400 tracking-wide">⚡ POWER-UPS & LEAPS</h2>
-        <p class="text-[9px] text-slate-400">Click or hover for info</p>
+    <!-- Bottom Power-Up / Leap Deck Bar (Moved from right side to below canvas) -->
+    <aside class="w-full bg-slate-900/90 backdrop-blur-md border border-amber-500/40 rounded-2xl p-2 flex flex-col shadow-xl">
+      <div class="flex items-center justify-between pb-1 mb-1.5 border-b border-amber-500/30 px-1">
+        <h2 class="font-fredoka text-xs sm:text-sm text-amber-400 tracking-wide flex items-center space-x-1.5">
+          <span>⚡</span>
+          <span>POWER-UPS & LEAPS</span>
+        </h2>
+        <span class="text-[9px] text-slate-400">Click or hover for info</span>
       </div>
-      <div id="powerup-deck-container" class="flex-1 overflow-y-auto space-y-2 pr-0.5 mb-2">
+      <div id="powerup-deck-container" class="flex flex-row overflow-x-auto space-x-2 pb-1 pr-1 mb-1.5 min-h-[56px] items-center">
         <!-- Rendered via JS -->
       </div>
       <!-- Blue Description Box at Bottom of Panel -->
-      <div id="powerup-desc-box" class="bg-blue-950/80 border border-blue-500/60 rounded-xl p-2 text-[10px] text-blue-200 font-medium leading-snug shadow-inner min-h-[48px] flex items-center justify-center text-center">
+      <div id="powerup-desc-box" class="bg-blue-950/80 border border-blue-500/60 rounded-xl p-1.5 text-[10px] text-blue-200 font-medium leading-snug shadow-inner flex items-center justify-center text-center">
         Hover or select a power-up card to view its description here.
       </div>
     </aside>
   </div>
 
   <!-- Bottom Control Deck & Sequence Bar -->
-  <footer class="w-full max-w-5xl z-10 flex flex-col gap-1.5">
+  <footer class="w-full max-w-4xl z-10 flex flex-col gap-1.5">
     
     <!-- Movement Queue Preview Bar -->
     <div class="w-full bg-slate-900/90 backdrop-blur-md p-2 rounded-xl border border-slate-800 flex items-center justify-between min-h-[52px]">
@@ -404,11 +407,9 @@
 
     const SKINS = [
       // --- BUNNIES (20 Styles) ---
-      // 3 Carrot Purchase Skins: cyan, pink, gold
       { id: 'cyan', name: 'Neon Cyan Bunny', category: 'bunny', type: 'bunny', color: '#00e5ff', earInner: '#a5f3fc', blush: '#38bdf8', purchaseType: 'carrot', cost: 50, unlocked: true },
       { id: 'pink', name: 'Cyber Pink Bunny', category: 'bunny', type: 'bunny', color: '#ec4899', earInner: '#fbcfe8', blush: '#f43f5e', purchaseType: 'carrot', cost: 75, unlocked: false },
       { id: 'gold', name: 'Golden Bunny', category: 'bunny', type: 'bunny', color: '#f59e0b', earInner: '#fef08a', blush: '#fbbf24', purchaseType: 'carrot', cost: 100, unlocked: false },
-      // Trial/Ad Skins
       { id: 'matrix', name: 'Matrix Emerald', category: 'bunny', type: 'bunny', color: '#10b981', earInner: '#a7f3d0', blush: '#34d399', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
       { id: 'sakura', name: 'Sakura Blossom', category: 'bunny', type: 'bunny', color: '#fda4af', earInner: '#ffe4e6', blush: '#fb7185', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
       { id: 'lavender', name: 'Lavender Dream', category: 'bunny', type: 'bunny', color: '#c084fc', earInner: '#f3e8ff', blush: '#a855f7', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
@@ -428,11 +429,9 @@
       { id: 'obsidian', name: 'Midnight Obsidian', category: 'bunny', type: 'bunny', color: '#1e293b', earInner: '#475569', blush: '#0f172a', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
 
       // --- CAT & FRIENDS (20 Styles) ---
-      // 3 Carrot Purchase Skins: cat_kitty, dog_puppy, hamster_cheek
       { id: 'cat_kitty', name: 'Neon Kitty', category: 'cat_friends', type: 'cat', color: '#fb7185', earInner: '#fbcfe8', blush: '#f43f5e', purchaseType: 'carrot', cost: 50, unlocked: false },
       { id: 'dog_puppy', name: 'Sparkle Puppy', category: 'cat_friends', type: 'dog', color: '#a16207', earInner: '#fef08a', blush: '#ca8a04', purchaseType: 'carrot', cost: 75, unlocked: false },
       { id: 'hamster_cheek', name: 'Chubby Hamster', category: 'cat_friends', type: 'hamster', color: '#fb923c', earInner: '#ffedd5', blush: '#f97316', purchaseType: 'carrot', cost: 100, unlocked: false },
-      // Trial/Ad Skins
       { id: 'duck_quack', name: 'Sunny Duck', category: 'cat_friends', type: 'duck', color: '#facc15', earInner: '#fef9c3', blush: '#eab308', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
       { id: 'penguin_ice', name: 'Frosty Penguin', category: 'cat_friends', type: 'penguin', color: '#0284c7', earInner: '#e0f2fe', blush: '#0284c7', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
       { id: 'fox_kitsune', name: 'Neon Fox', category: 'cat_friends', type: 'fox', color: '#f97316', earInner: '#fed7aa', blush: '#ea580c', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
@@ -452,11 +451,9 @@
       { id: 'bat', name: 'Shadow Bat', category: 'cat_friends', type: 'owl', color: '#312e81', earInner: '#4338ca', blush: '#1e1b4b', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
 
       // --- WILD & FOREST (20 Styles) ---
-      // 3 Carrot Purchase Skins: bear_teddy, panda_bamboo, koala_eucaly
       { id: 'bear_teddy', name: 'Honey Bear', category: 'wild', type: 'bear', color: '#d97706', earInner: '#fde68a', blush: '#b45309', purchaseType: 'carrot', cost: 50, unlocked: false },
       { id: 'panda_bamboo', name: 'Cyber Panda', category: 'wild', type: 'panda', color: '#334155', earInner: '#cbd5e1', blush: '#64748b', purchaseType: 'carrot', cost: 75, unlocked: false },
       { id: 'koala_eucaly', name: 'Dreamy Koala', category: 'wild', type: 'koala', color: '#64748b', earInner: '#cbd5e1', blush: '#475569', purchaseType: 'carrot', cost: 100, unlocked: false },
-      // Trial/Ad Skins
       { id: 'frog_lily', name: 'Neon Frog', category: 'wild', type: 'frog', color: '#22c55e', earInner: '#bbf7d0', blush: '#16a34a', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
       { id: 'tiger_stripe', name: 'Neon Tiger', category: 'wild', type: 'tiger', color: '#f97316', earInner: '#ffedd5', blush: '#c2410c', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
       { id: 'lion_mane', name: 'Solar Lion', category: 'wild', type: 'lion', color: '#eab308', earInner: '#fef08a', blush: '#ca8a04', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
@@ -1055,7 +1052,7 @@
       powerupDeck.forEach((card) => {
         const isJump = card.type === 'jump';
         const btn = document.createElement('button');
-        btn.className = `card-item w-full p-2 rounded-xl flex items-center space-x-2 border transition shadow-md ${
+        btn.className = `card-item p-2 rounded-xl flex flex-col items-center justify-center border transition shadow-md shrink-0 w-28 sm:w-32 ${
           card.used 
             ? 'opacity-20 border-slate-800 bg-slate-900 pointer-events-none' 
             : isJump 
@@ -1071,11 +1068,11 @@
         };
 
         btn.innerHTML = `
-          <span class="text-lg">${card.icon}</span>
-          <div class="text-left leading-tight">
-            <p class="text-[10px] font-bold ${isJump ? 'text-cyan-300' : 'text-amber-300'}">${card.label}</p>
-            <p class="text-[8px] text-slate-400 uppercase">${isJump ? 'Leap Move' : 'Power-Up'}</p>
+          <div class="flex items-center space-x-1">
+            <span class="text-sm">${card.icon}</span>
+            <span class="text-[10px] font-bold ${isJump ? 'text-cyan-300' : 'text-amber-300'} truncate">${card.label}</span>
           </div>
+          <span class="text-[8px] text-slate-400 uppercase">${isJump ? 'Leap' : 'Power'}</span>
         `;
         powerContainer.appendChild(btn);
       });
@@ -2060,7 +2057,7 @@
        ========================================================================= */
     function resizeCanvas() {
       const container = CANVAS.parentElement;
-      const size = Math.min(container.clientWidth, container.clientHeight, 540);
+      const size = Math.min(container.clientWidth, window.innerHeight * 0.58, 620);
       CANVAS.width = size; CANVAS.height = size;
       TILE_SIZE = size / GRID_SIZE;
     }
