@@ -154,6 +154,11 @@
                     <span id="new-best-tag" class="hidden text-[10px] font-bold text-amber-400 tracking-widest animate-bounce">★ NEW HIGH SCORE ★</span>
                 </div>
 
+                <!-- Continue Run via Ad Button -->
+                <button id="continue-ad-btn" class="hidden w-full py-3 px-6 mb-2 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-slate-950 font-black font-orbitron text-xs md:text-sm tracking-wider shadow-[0_0_20px_rgba(255,191,0,0.6)] hover:scale-105 active:scale-95 transition-all animate-pulse">
+                    📺 WATCH AD TO CONTINUE (<span id="continue-count-val">2</span>/2 LEFT)
+                </button>
+
                 <!-- Skins & Pets Shop Button -->
                 <button id="open-shop-btn" class="w-full py-2 px-6 mb-3 rounded-xl bg-slate-900/90 border border-fuchsia-500/50 text-fuchsia-300 font-bold font-orbitron text-xs tracking-wider flex items-center justify-center gap-2 hover:bg-fuchsia-950/40 transition-all">
                     <span>🐱</span> WARDROBE, PETS & SHOP (<span id="shop-coins-val">0</span> 🪙)
@@ -202,6 +207,7 @@
                 <!-- Shop Tabs -->
                 <div class="flex gap-2 w-full mb-3">
                     <button id="tab-kitty-btn" onclick="switchShopTab('kitty')" class="flex-1 py-1.5 rounded-xl font-bold font-orbitron text-xs border border-fuchsia-500 bg-fuchsia-600 text-white transition-all">🐱 KITTY</button>
+                    <button id="tab-nero-btn" onclick="switchShopTab('nero')" class="flex-1 py-1.5 rounded-xl font-bold font-orbitron text-xs border border-zinc-500/50 bg-slate-900 text-zinc-300 transition-all">⬛ NERO ANIMALS</button>
                     <button id="tab-object-btn" onclick="switchShopTab('object')" class="flex-1 py-1.5 rounded-xl font-bold font-orbitron text-xs border border-cyan-500/50 bg-slate-900 text-cyan-300 transition-all">📦 OBJECTS</button>
                     <button id="tab-pet-btn" onclick="switchShopTab('pet')" class="flex-1 py-1.5 rounded-xl font-bold font-orbitron text-xs border border-amber-500/50 bg-slate-900 text-amber-300 transition-all">🐾 PETS (10)</button>
                 </div>
@@ -351,14 +357,7 @@
         const ctx = canvas.getContext('2d');
         let dpr = Math.min(window.devicePixelRatio || 1, 2);
 
-        function resizeCanvas() {
-            canvas.width = window.innerWidth * dpr;
-            canvas.height = window.innerHeight * dpr;
-            ctx.scale(dpr, dpr);
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
+        // State variables declared before resizeCanvas to avoid ReferenceError
         let isGameRunning = false;
         let isPaused = false;
         let score = 0;
@@ -373,6 +372,25 @@
         let levelTargetPoints = 1200;
         let isBossActive = false;
         let bossInstance = null;
+
+        function resizeCanvas() {
+            const oldWidth = canvas.width / dpr || window.innerWidth;
+            canvas.width = window.innerWidth * dpr;
+            canvas.height = window.innerHeight * dpr;
+            ctx.scale(dpr, dpr);
+
+            // FIX #4: Recalculate boss laser coordinates on window resize to prevent desync
+            if (isBossActive && bossInstance && bossInstance.laserState.active) {
+                const ratio = window.innerWidth / oldWidth;
+                bossInstance.laserState.x *= ratio;
+                bossInstance.x *= ratio;
+            }
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        let continuesUsed = 0;
+        const maxContinues = 2;
 
         let skillCooldowns = { 1: 0, 2: 0, 3: 0 };
         const skillMaxCooldowns = { 1: 150, 2: 300, 3: 450 };
@@ -402,6 +420,19 @@
             { id: 'sunset', name: 'Sunset Glow', type: 'ad', cost: 0, color: '#ff7700', core: '#ffe6cc', ear: '#ff3300' },
             { id: 'void', name: 'Void Shadow', type: 'ad', cost: 0, color: '#9933ff', core: '#1a0033', ear: '#b84dff' },
             { id: 'unicorn', name: 'Rainbow Unicorn', type: 'ad', cost: 0, color: '#ff00aa', core: '#ffff99', ear: '#00ffff' }
+        ];
+
+        const NERO_SKINS = [
+            { id: 'nero_panther', name: 'Nero Panther', animal: 'panther', type: 'coin', cost: 150, color: '#1a1a1a', core: '#333333', ear: '#0a0a0a', eyeColor: '#39ff14', noseColor: '#ff0055', detailColor: '#00f3ff' },
+            { id: 'nero_wolf', name: 'Nero Wolf', animal: 'wolf', type: 'coin', cost: 200, color: '#1a1a1a', core: '#2d2d2d', ear: '#0d0d0d', eyeColor: '#ffb300', noseColor: '#1a1a1a', detailColor: '#ff00ff' },
+            { id: 'nero_bear', name: 'Nero Bear', animal: 'bear', type: 'coin', cost: 250, color: '#141414', core: '#2b2b2b', ear: '#0a0a0a', eyeColor: '#00f3ff', noseColor: '#ff3366', detailColor: '#ffd700' },
+            { id: 'nero_fox', name: 'Nero Fox', animal: 'fox', type: 'coin', cost: 300, color: '#1f1f1f', core: '#383838', ear: '#0f0f0f', eyeColor: '#ff00ff', noseColor: '#1a1a1a', detailColor: '#39ff14' },
+            { id: 'nero_owl', name: 'Nero Owl', animal: 'owl', type: 'coin', cost: 350, color: '#181818', core: '#2e2e2e', ear: '#0a0a0a', eyeColor: '#ffd700', noseColor: '#ff9900', detailColor: '#00f3ff' },
+            { id: 'nero_rabbit', name: 'Nero Rabbit', animal: 'rabbit', type: 'ad', cost: 0, color: '#1c1c1c', core: '#363636', ear: '#111111', eyeColor: '#ff3366', noseColor: '#ff00ff', detailColor: '#ffffff' },
+            { id: 'nero_dragon', name: 'Nero Dragon', animal: 'dragon', type: 'ad', cost: 0, color: '#121212', core: '#262626', ear: '#080808', eyeColor: '#39ff14', noseColor: '#ff0000', detailColor: '#ff0055' },
+            { id: 'nero_tiger', name: 'Nero Tiger', animal: 'tiger', type: 'ad', cost: 0, color: '#1a1a1a', core: '#303030', ear: '#0d0d0d', eyeColor: '#ffb300', noseColor: '#ff0055', detailColor: '#ffb300' },
+            { id: 'nero_bat', name: 'Nero Bat', animal: 'bat', type: 'ad', cost: 0, color: '#141414', core: '#282828', ear: '#090909', eyeColor: '#ff0055', noseColor: '#1a1a1a', detailColor: '#b026ff' },
+            { id: 'nero_stag', name: 'Nero Stag', animal: 'stag', type: 'ad', cost: 0, color: '#171717', core: '#2f2f2f', ear: '#0c0c0c', eyeColor: '#00f3ff', noseColor: '#1a1a1a', detailColor: '#00f3ff' }
         ];
 
         const OBJECT_SKINS = [
@@ -439,6 +470,9 @@
         let unlockedPets = JSON.parse(localStorage.getItem('neon_letter_pets_unlocked')) || ['pet_sparky'];
         let currentPetId = localStorage.getItem('neon_letter_current_pet') || 'pet_sparky';
 
+        // 3-Day Trial system timestamps dictionary { itemId: expirationTimestamp }
+        let itemTrials = JSON.parse(localStorage.getItem('neon_letter_trials')) || {};
+
         let activeShopTab = 'kitty';
         let petSkillTimer = 0;
 
@@ -456,6 +490,8 @@
         const modalTitle = document.getElementById('modal-title');
         const modalSubtitle = document.getElementById('modal-subtitle');
         const startBtn = document.getElementById('start-btn');
+        const continueAdBtn = document.getElementById('continue-ad-btn');
+        const continueCountValEl = document.getElementById('continue-count-val');
         const scoreSummary = document.getElementById('score-summary');
         const finalScoreEl = document.getElementById('final-score');
         const finalLevelEl = document.getElementById('final-level');
@@ -476,6 +512,7 @@
         const shopSubtitle = document.getElementById('shop-subtitle');
         const skinsGrid = document.getElementById('skins-grid');
         const tabKittyBtn = document.getElementById('tab-kitty-btn');
+        const tabNeroBtn = document.getElementById('tab-nero-btn');
         const tabObjectBtn = document.getElementById('tab-object-btn');
         const tabPetBtn = document.getElementById('tab-pet-btn');
         const adModal = document.getElementById('ad-modal');
@@ -503,21 +540,49 @@
             modalCoinValEl.textContent = coins;
         }
 
+        function getRemainingTrialText(expiryTimestamp) {
+            if (!expiryTimestamp) return null;
+            const diff = expiryTimestamp - Date.now();
+            if (diff <= 0) return null;
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+            if (days > 0) return `${days}d ${hours}h left`;
+            if (hours > 0) return `${hours}h ${mins}m left`;
+            return `${mins}m left`;
+        }
+
+        function isItemTrialActive(itemId) {
+            const expiry = itemTrials[itemId];
+            return expiry && Date.now() < expiry;
+        }
+
+        function isItemTrialExpired(itemId) {
+            const expiry = itemTrials[itemId];
+            return expiry && Date.now() >= expiry;
+        }
+
         window.switchShopTab = function(tab) {
             activeShopTab = tab;
             tabKittyBtn.className = "flex-1 py-1.5 rounded-xl font-bold font-orbitron text-xs border border-fuchsia-500/50 bg-slate-900 text-fuchsia-300 transition-all";
+            tabNeroBtn.className = "flex-1 py-1.5 rounded-xl font-bold font-orbitron text-xs border border-zinc-500/50 bg-slate-900 text-zinc-300 transition-all";
             tabObjectBtn.className = "flex-1 py-1.5 rounded-xl font-bold font-orbitron text-xs border border-cyan-500/50 bg-slate-900 text-cyan-300 transition-all";
             tabPetBtn.className = "flex-1 py-1.5 rounded-xl font-bold font-orbitron text-xs border border-amber-500/50 bg-slate-900 text-amber-300 transition-all";
 
             if (tab === 'kitty') {
                 tabKittyBtn.className = "flex-1 py-1.5 rounded-xl font-bold font-orbitron text-xs border border-fuchsia-500 bg-fuchsia-600 text-white transition-all";
-                shopSubtitle.textContent = "Unlock custom Kitty-Bot skins!";
+                shopSubtitle.textContent = "Unlock custom Kitty-Bot skins or start 3-Day Free Trials!";
+            } else if (tab === 'nero') {
+                tabNeroBtn.className = "flex-1 py-1.5 rounded-xl font-bold font-orbitron text-xs border border-zinc-400 bg-zinc-800 text-zinc-100 transition-all";
+                shopSubtitle.textContent = "Unlock 10 Nero Dark Animal skins with unique face features!";
             } else if (tab === 'object') {
                 tabObjectBtn.className = "flex-1 py-1.5 rounded-xl font-bold font-orbitron text-xs border border-cyan-500 bg-cyan-600 text-white transition-all";
                 shopSubtitle.textContent = "Unlock 10 falling object skin packs (Animals, Tools, Space & more)!";
             } else {
                 tabPetBtn.className = "flex-1 py-1.5 rounded-xl font-bold font-orbitron text-xs border border-amber-500 bg-amber-600 text-slate-950 font-black transition-all";
-                shopSubtitle.textContent = "Equip cute Pets to help Kitty! 4 coin pets & 6 ad pets (active skills every 10s)!";
+                shopSubtitle.textContent = "Equip cute Pets to help Kitty! 4 coin pets & 6 ad trial pets (active skills every 10s)!";
             }
             renderShop();
         };
@@ -527,20 +592,34 @@
             if (activeShopTab === 'kitty') {
                 SKINS.forEach(skin => {
                     const isUnlocked = unlockedSkins.includes(skin.id);
+                    const trialActive = isItemTrialActive(skin.id);
+                    const trialExpired = isItemTrialExpired(skin.id);
+                    const canUse = isUnlocked || trialActive;
                     const isSelected = currentSkinId === skin.id;
 
                     const card = document.createElement('div');
                     card.className = `skin-card p-2.5 rounded-2xl flex flex-col items-center justify-between text-center relative ${isSelected ? 'selected' : ''}`;
                     
                     let actionBtnHTML = '';
+                    let badgeText = skin.type === 'ad' ? '3-Day Trial' : (skin.type === 'coin' ? 'Coin Store' : 'Default');
+                    
+                    if (trialActive) {
+                        const timeText = getRemainingTrialText(itemTrials[skin.id]);
+                        badgeText = `⏳ TRIAL (${timeText})`;
+                    } else if (trialExpired) {
+                        badgeText = `⚠️ TRIAL EXPIRED`;
+                    }
+
                     if (isSelected) {
                         actionBtnHTML = `<span class="text-[11px] font-bold text-cyan-400 font-orbitron py-1">EQUIPPED</span>`;
-                    } else if (isUnlocked) {
+                    } else if (canUse) {
                         actionBtnHTML = `<button onclick="equipSkin('${skin.id}')" class="w-full py-1 rounded-lg bg-cyan-500/20 border border-cyan-500 text-cyan-300 text-[11px] font-bold font-orbitron hover:bg-cyan-500/40">EQUIP</button>`;
                     } else if (skin.type === 'coin') {
                         actionBtnHTML = `<button onclick="buySkinWithCoins('${skin.id}', ${skin.cost})" class="w-full py-1 rounded-lg bg-amber-500/20 border border-amber-500 text-amber-300 text-[11px] font-bold font-orbitron hover:bg-amber-500/40">🪙 ${skin.cost}</button>`;
+                    } else if (trialExpired) {
+                        actionBtnHTML = `<button onclick="watchAdForSkin('${skin.id}', 'kitty')" class="w-full py-1 rounded-lg bg-rose-500/20 border border-rose-500 text-rose-300 text-[10px] font-bold font-orbitron hover:bg-rose-500/40">📺 RENEW 3-DAY TRIAL</button>`;
                     } else {
-                        actionBtnHTML = `<button onclick="watchAdForSkin('${skin.id}', 'kitty')" class="w-full py-1 rounded-lg bg-fuchsia-500/20 border border-fuchsia-500 text-fuchsia-300 text-[11px] font-bold font-orbitron hover:bg-fuchsia-500/40">📺 WATCH AD</button>`;
+                        actionBtnHTML = `<button onclick="watchAdForSkin('${skin.id}', 'kitty')" class="w-full py-1 rounded-lg bg-fuchsia-500/20 border border-fuchsia-500 text-fuchsia-300 text-[10px] font-bold font-orbitron hover:bg-fuchsia-500/40">📺 GET 3-DAY TRIAL</button>`;
                     }
 
                     card.innerHTML = `
@@ -548,7 +627,50 @@
                             <div class="w-3.5 h-3.5 rounded-full border border-white/30" style="background:${skin.color}"></div>
                             <span class="text-[11px] font-bold font-orbitron text-white">${skin.name}</span>
                         </div>
-                        <div class="text-[9px] text-gray-400 uppercase tracking-widest mb-1.5">${skin.type === 'ad' ? 'Ad Unlock' : (skin.type === 'coin' ? 'Coin Store' : 'Default')}</div>
+                        <div class="text-[9px] ${trialActive ? 'text-amber-300 font-bold' : (trialExpired ? 'text-rose-400 font-bold' : 'text-gray-400')} uppercase tracking-wider mb-1.5">${badgeText}</div>
+                        ${actionBtnHTML}
+                    `;
+                    skinsGrid.appendChild(card);
+                });
+            } else if (activeShopTab === 'nero') {
+                NERO_SKINS.forEach(skin => {
+                    const isUnlocked = unlockedSkins.includes(skin.id);
+                    const trialActive = isItemTrialActive(skin.id);
+                    const trialExpired = isItemTrialExpired(skin.id);
+                    const canUse = isUnlocked || trialActive;
+                    const isSelected = currentSkinId === skin.id;
+
+                    const card = document.createElement('div');
+                    card.className = `skin-card p-2.5 rounded-2xl flex flex-col items-center justify-between text-center relative ${isSelected ? 'selected' : ''}`;
+                    
+                    let actionBtnHTML = '';
+                    let badgeText = skin.type === 'ad' ? '3-Day Trial' : (skin.type === 'coin' ? 'Coin Store' : 'Nero Series');
+
+                    if (trialActive) {
+                        const timeText = getRemainingTrialText(itemTrials[skin.id]);
+                        badgeText = `⏳ TRIAL (${timeText})`;
+                    } else if (trialExpired) {
+                        badgeText = `⚠️ TRIAL EXPIRED`;
+                    }
+
+                    if (isSelected) {
+                        actionBtnHTML = `<span class="text-[11px] font-bold text-cyan-400 font-orbitron py-1">EQUIPPED</span>`;
+                    } else if (canUse) {
+                        actionBtnHTML = `<button onclick="equipSkin('${skin.id}')" class="w-full py-1 rounded-lg bg-cyan-500/20 border border-cyan-500 text-cyan-300 text-[11px] font-bold font-orbitron hover:bg-cyan-500/40">EQUIP</button>`;
+                    } else if (skin.type === 'coin') {
+                        actionBtnHTML = `<button onclick="buySkinWithCoins('${skin.id}', ${skin.cost})" class="w-full py-1 rounded-lg bg-amber-500/20 border border-amber-500 text-amber-300 text-[11px] font-bold font-orbitron hover:bg-amber-500/40">🪙 ${skin.cost}</button>`;
+                    } else if (trialExpired) {
+                        actionBtnHTML = `<button onclick="watchAdForSkin('${skin.id}', 'kitty')" class="w-full py-1 rounded-lg bg-rose-500/20 border border-rose-500 text-rose-300 text-[10px] font-bold font-orbitron hover:bg-rose-500/40">📺 RENEW 3-DAY TRIAL</button>`;
+                    } else {
+                        actionBtnHTML = `<button onclick="watchAdForSkin('${skin.id}', 'kitty')" class="w-full py-1 rounded-lg bg-fuchsia-500/20 border border-fuchsia-500 text-fuchsia-300 text-[10px] font-bold font-orbitron hover:bg-fuchsia-500/40">📺 GET 3-DAY TRIAL</button>`;
+                    }
+
+                    card.innerHTML = `
+                        <div class="flex items-center gap-1 mb-1">
+                            <div class="w-3.5 h-3.5 rounded-full border border-zinc-600" style="background:${skin.color}; box-shadow: 0 0 5px ${skin.eyeColor}"></div>
+                            <span class="text-[11px] font-bold font-orbitron text-zinc-200">${skin.name}</span>
+                        </div>
+                        <div class="text-[9px] ${trialActive ? 'text-amber-300 font-bold' : (trialExpired ? 'text-rose-400 font-bold' : 'text-zinc-400')} uppercase tracking-wider mb-1.5">${badgeText}</div>
                         ${actionBtnHTML}
                     `;
                     skinsGrid.appendChild(card);
@@ -556,20 +678,34 @@
             } else if (activeShopTab === 'object') {
                 OBJECT_SKINS.forEach(skin => {
                     const isUnlocked = unlockedObjectSkins.includes(skin.id);
+                    const trialActive = isItemTrialActive(skin.id);
+                    const trialExpired = isItemTrialExpired(skin.id);
+                    const canUse = isUnlocked || trialActive;
                     const isSelected = currentObjectSkinId === skin.id;
 
                     const card = document.createElement('div');
                     card.className = `skin-card p-2.5 rounded-2xl flex flex-col items-center justify-between text-center relative ${isSelected ? 'selected' : ''}`;
                     
                     let actionBtnHTML = '';
+                    let badgeText = skin.category;
+
+                    if (trialActive) {
+                        const timeText = getRemainingTrialText(itemTrials[skin.id]);
+                        badgeText = `⏳ TRIAL (${timeText})`;
+                    } else if (trialExpired) {
+                        badgeText = `⚠️ TRIAL EXPIRED`;
+                    }
+
                     if (isSelected) {
                         actionBtnHTML = `<span class="text-[11px] font-bold text-cyan-400 font-orbitron py-1">EQUIPPED</span>`;
-                    } else if (isUnlocked) {
+                    } else if (canUse) {
                         actionBtnHTML = `<button onclick="equipObjectSkin('${skin.id}')" class="w-full py-1 rounded-lg bg-cyan-500/20 border border-cyan-500 text-cyan-300 text-[11px] font-bold font-orbitron hover:bg-cyan-500/40">EQUIP</button>`;
                     } else if (skin.type === 'coin') {
                         actionBtnHTML = `<button onclick="buyObjectSkinWithCoins('${skin.id}', ${skin.cost})" class="w-full py-1 rounded-lg bg-amber-500/20 border border-amber-500 text-amber-300 text-[11px] font-bold font-orbitron hover:bg-amber-500/40">🪙 ${skin.cost}</button>`;
+                    } else if (trialExpired) {
+                        actionBtnHTML = `<button onclick="watchAdForSkin('${skin.id}', 'object')" class="w-full py-1 rounded-lg bg-rose-500/20 border border-rose-500 text-rose-300 text-[10px] font-bold font-orbitron hover:bg-rose-500/40">📺 RENEW 3-DAY TRIAL</button>`;
                     } else {
-                        actionBtnHTML = `<button onclick="watchAdForSkin('${skin.id}', 'object')" class="w-full py-1 rounded-lg bg-fuchsia-500/20 border border-fuchsia-500 text-fuchsia-300 text-[11px] font-bold font-orbitron hover:bg-fuchsia-500/40">📺 WATCH AD</button>`;
+                        actionBtnHTML = `<button onclick="watchAdForSkin('${skin.id}', 'object')" class="w-full py-1 rounded-lg bg-fuchsia-500/20 border border-fuchsia-500 text-fuchsia-300 text-[10px] font-bold font-orbitron hover:bg-fuchsia-500/40">📺 GET 3-DAY TRIAL</button>`;
                     }
 
                     card.innerHTML = `
@@ -577,7 +713,7 @@
                             <span class="text-sm">${skin.symbol}</span>
                             <span class="text-[11px] font-bold font-orbitron text-white">${skin.name}</span>
                         </div>
-                        <div class="text-[9px] text-gray-400 uppercase tracking-widest mb-1.5">${skin.category}</div>
+                        <div class="text-[9px] ${trialActive ? 'text-amber-300 font-bold' : (trialExpired ? 'text-rose-400 font-bold' : 'text-gray-400')} uppercase tracking-wider mb-1.5">${badgeText}</div>
                         ${actionBtnHTML}
                     `;
                     skinsGrid.appendChild(card);
@@ -585,20 +721,34 @@
             } else {
                 PETS.forEach(pet => {
                     const isUnlocked = unlockedPets.includes(pet.id);
+                    const trialActive = isItemTrialActive(pet.id);
+                    const trialExpired = isItemTrialExpired(pet.id);
+                    const canUse = isUnlocked || trialActive;
                     const isSelected = currentPetId === pet.id;
 
                     const card = document.createElement('div');
                     card.className = `skin-card p-2.5 rounded-2xl flex flex-col items-center justify-between text-center relative ${isSelected ? 'selected' : ''}`;
                     
                     let actionBtnHTML = '';
+                    let badgeText = '';
+
+                    if (trialActive) {
+                        const timeText = getRemainingTrialText(itemTrials[pet.id]);
+                        badgeText = `⏳ 3-DAY TRIAL (${timeText})`;
+                    } else if (trialExpired) {
+                        badgeText = `⚠️ TRIAL EXPIRED`;
+                    }
+
                     if (isSelected) {
                         actionBtnHTML = `<span class="text-[11px] font-bold text-amber-400 font-orbitron py-1">ACTIVE PET</span>`;
-                    } else if (isUnlocked) {
+                    } else if (canUse) {
                         actionBtnHTML = `<button onclick="equipPet('${pet.id}')" class="w-full py-1 rounded-lg bg-amber-500/20 border border-amber-500 text-amber-300 text-[11px] font-bold font-orbitron hover:bg-amber-500/40">EQUIP</button>`;
                     } else if (pet.type === 'coin') {
                         actionBtnHTML = `<button onclick="buyPetWithCoins('${pet.id}', ${pet.cost})" class="w-full py-1 rounded-lg bg-amber-500/20 border border-amber-500 text-amber-300 text-[11px] font-bold font-orbitron hover:bg-amber-500/40">🪙 ${pet.cost}</button>`;
+                    } else if (trialExpired) {
+                        actionBtnHTML = `<button onclick="watchAdForSkin('${pet.id}', 'pet')" class="w-full py-1 rounded-lg bg-rose-500/20 border border-rose-500 text-rose-300 text-[10px] font-bold font-orbitron hover:bg-rose-500/40">📺 RENEW 3-DAY TRIAL</button>`;
                     } else {
-                        actionBtnHTML = `<button onclick="watchAdForSkin('${pet.id}', 'pet')" class="w-full py-1 rounded-lg bg-fuchsia-500/20 border border-fuchsia-500 text-fuchsia-300 text-[11px] font-bold font-orbitron hover:bg-fuchsia-500/40">📺 WATCH AD (SKILL)</button>`;
+                        actionBtnHTML = `<button onclick="watchAdForSkin('${pet.id}', 'pet')" class="w-full py-1 rounded-lg bg-fuchsia-500/20 border border-fuchsia-500 text-fuchsia-300 text-[10px] font-bold font-orbitron hover:bg-fuchsia-500/40">📺 GET 3-DAY TRIAL</button>`;
                     }
 
                     card.innerHTML = `
@@ -606,7 +756,8 @@
                             <span class="text-sm">${pet.symbol}</span>
                             <span class="text-[11px] font-bold font-orbitron text-white">${pet.name}</span>
                         </div>
-                        <div class="text-[9px] text-amber-200/80 mb-1.5 leading-tight">${pet.power}</div>
+                        <div class="text-[9px] text-amber-200/80 mb-1 leading-tight">${pet.power}</div>
+                        ${badgeText ? `<div class="text-[9px] ${trialActive ? 'text-amber-300 font-bold' : 'text-rose-400 font-bold'} uppercase tracking-wider mb-1">${badgeText}</div>` : ''}
                         ${actionBtnHTML}
                     `;
                     skinsGrid.appendChild(card);
@@ -623,7 +774,7 @@
         window.buySkinWithCoins = function(id, cost) {
             if (coins >= cost) {
                 updateCoins(-cost);
-                unlockedSkins.push(id);
+                if (!unlockedSkins.includes(id)) unlockedSkins.push(id);
                 localStorage.setItem('neon_letter_unlocked', JSON.stringify(unlockedSkins));
                 equipSkin(id);
             } else {
@@ -640,7 +791,7 @@
         window.buyObjectSkinWithCoins = function(id, cost) {
             if (coins >= cost) {
                 updateCoins(-cost);
-                unlockedObjectSkins.push(id);
+                if (!unlockedObjectSkins.includes(id)) unlockedObjectSkins.push(id);
                 localStorage.setItem('neon_object_unlocked', JSON.stringify(unlockedObjectSkins));
                 equipObjectSkin(id);
             } else {
@@ -657,7 +808,7 @@
         window.buyPetWithCoins = function(id, cost) {
             if (coins >= cost) {
                 updateCoins(-cost);
-                unlockedPets.push(id);
+                if (!unlockedPets.includes(id)) unlockedPets.push(id);
                 localStorage.setItem('neon_letter_pets_unlocked', JSON.stringify(unlockedPets));
                 equipPet(id);
             } else {
@@ -668,29 +819,29 @@
         window.watchAdForSkin = function(id, type) {
             adModal.classList.remove('hidden');
             let timeLeft = 3;
-            adTimerText.textContent = `Unlocking item in ${timeLeft} seconds...`;
+            adTimerText.textContent = `Unlocking 3-Day Trial in ${timeLeft} seconds...`;
             adProgressBar.style.width = '100%';
             
             const timer = setInterval(() => {
                 timeLeft--;
-                adTimerText.textContent = `Unlocking item in ${timeLeft} seconds...`;
+                adTimerText.textContent = `Unlocking 3-Day Trial in ${timeLeft} seconds...`;
                 adProgressBar.style.width = `${(timeLeft / 3) * 100}%`;
                 if (timeLeft <= 0) {
                     clearInterval(timer);
                     adModal.classList.add('hidden');
+
+                    const trialExpiry = Date.now() + (3 * 24 * 60 * 60 * 1000);
+                    itemTrials[id] = trialExpiry;
+                    localStorage.setItem('neon_letter_trials', JSON.stringify(itemTrials));
+
                     if (type === 'kitty') {
-                        unlockedSkins.push(id);
-                        localStorage.setItem('neon_letter_unlocked', JSON.stringify(unlockedSkins));
                         equipSkin(id);
                     } else if (type === 'object') {
-                        unlockedObjectSkins.push(id);
-                        localStorage.setItem('neon_object_unlocked', JSON.stringify(unlockedObjectSkins));
                         equipObjectSkin(id);
                     } else if (type === 'pet') {
-                        unlockedPets.push(id);
-                        localStorage.setItem('neon_letter_pets_unlocked', JSON.stringify(unlockedPets));
                         equipPet(id);
                     }
+                    renderShop();
                 }
             }, 1000);
         };
@@ -733,6 +884,7 @@
             modalTitle.textContent = "NEON MAYHEM";
             modalSubtitle.textContent = "Help Kitty-Bot dodge neon rains & unique giant bosses!";
             scoreSummary.classList.add('hidden');
+            continueAdBtn.classList.add('hidden');
             startBtn.textContent = "START RUN";
             modalOverlay.classList.remove('opacity-0', 'pointer-events-none');
         });
@@ -753,6 +905,16 @@
 
         const keys = { left: false, right: false, jump: false, dash: false };
         let jumpKeyWasPressed = false;
+        let dashKeyWasPressed = false; // FIX #3: Latch for single dash trigger per key press
+
+        // Helper to validate and fetch skin object active status
+        function getValidObjectSkinId() {
+            let activeObjSkin = OBJECT_SKINS.find(s => s.id === currentObjectSkinId);
+            if (activeObjSkin && activeObjSkin.type === 'ad' && !unlockedObjectSkins.includes(activeObjSkin.id) && !isItemTrialActive(activeObjSkin.id)) {
+                currentObjectSkinId = 'obj_animals';
+            }
+            return currentObjectSkinId;
+        }
 
         const player = {
             x: window.innerWidth / 2,
@@ -825,7 +987,8 @@
                     }
 
                     const effectiveCooldown = 38;
-                    if (keys.dash && this.canDash && this.dashCooldown <= 0) {
+                    // FIX #3: Prevent continuous dashing loops when SHIFT key is held down
+                    if (keys.dash && !dashKeyWasPressed && this.canDash && this.dashCooldown <= 0) {
                         const moveDir = keys.left ? -1 : (keys.right ? 1 : (this.vx < 0 ? -1 : 1));
                         this.isDashing = true;
                         this.dashTime = 10;
@@ -838,6 +1001,8 @@
                 }
 
                 jumpKeyWasPressed = keys.jump;
+                dashKeyWasPressed = keys.dash;
+
                 if (this.dashCooldown > 0) this.dashCooldown--;
 
                 this.vy += this.gravity;
@@ -862,8 +1027,15 @@
             },
 
             draw(ctx) {
-                const activeSkin = SKINS.find(s => s.id === currentSkinId) || SKINS[0];
-                const glowColor = this.isDashing ? '#ff00ff' : activeSkin.color;
+                let activeSkin = SKINS.find(s => s.id === currentSkinId) || NERO_SKINS.find(s => s.id === currentSkinId);
+                if (activeSkin && activeSkin.type === 'ad' && !unlockedSkins.includes(activeSkin.id) && !isItemTrialActive(activeSkin.id)) {
+                    currentSkinId = 'cyber';
+                    activeSkin = SKINS[0];
+                }
+                if (!activeSkin) activeSkin = SKINS[0];
+
+                const isNero = currentSkinId.startsWith('nero_');
+                const glowColor = this.isDashing ? '#ff00ff' : (isNero ? activeSkin.detailColor : activeSkin.color);
 
                 ctx.shadowBlur = 0;
                 for (let i = 0; i < this.trail.length; i++) {
@@ -883,80 +1055,84 @@
                 }
 
                 ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
-                ctx.shadowBlur = 10;
+                ctx.shadowBlur = isNero ? 14 : 10;
                 ctx.shadowColor = glowColor;
 
                 const earWiggle = Math.sin(this.earAnimTime) * 0.12;
 
-                ctx.fillStyle = glowColor;
-                ctx.save();
-                ctx.rotate(-0.2 + earWiggle);
-                ctx.beginPath();
-                ctx.ellipse(-12, -22, 7, 16, 0, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = activeSkin.ear;
-                ctx.beginPath();
-                ctx.ellipse(-12, -22, 3.5, 9, 0, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
+                if (isNero) {
+                    this.drawNeroSkin(ctx, activeSkin, earWiggle, glowColor);
+                } else {
+                    ctx.fillStyle = glowColor;
+                    ctx.save();
+                    ctx.rotate(-0.2 + earWiggle);
+                    ctx.beginPath();
+                    ctx.ellipse(-12, -22, 7, 16, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = activeSkin.ear;
+                    ctx.beginPath();
+                    ctx.ellipse(-12, -22, 3.5, 9, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
 
-                ctx.fillStyle = glowColor;
-                ctx.save();
-                ctx.rotate(0.2 - earWiggle);
-                ctx.beginPath();
-                ctx.ellipse(12, -22, 7, 16, 0, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = activeSkin.ear;
-                ctx.beginPath();
-                ctx.ellipse(12, -22, 3.5, 9, 0, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
+                    ctx.fillStyle = glowColor;
+                    ctx.save();
+                    ctx.rotate(0.2 - earWiggle);
+                    ctx.beginPath();
+                    ctx.ellipse(12, -22, 7, 16, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = activeSkin.ear;
+                    ctx.beginPath();
+                    ctx.ellipse(12, -22, 3.5, 9, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
 
-                ctx.fillStyle = glowColor;
-                ctx.beginPath();
-                ctx.arc(0, 4, 20, 0, Math.PI * 2);
-                ctx.fill();
+                    ctx.fillStyle = glowColor;
+                    ctx.beginPath();
+                    ctx.arc(0, 4, 20, 0, Math.PI * 2);
+                    ctx.fill();
 
-                ctx.fillStyle = activeSkin.core;
-                ctx.beginPath();
-                ctx.arc(0, 4, 15, 0, Math.PI * 2);
-                ctx.fill();
+                    ctx.fillStyle = activeSkin.core;
+                    ctx.beginPath();
+                    ctx.arc(0, 4, 15, 0, Math.PI * 2);
+                    ctx.fill();
 
-                const lookOffsetX = this.vx < 0 ? -3 : (this.vx > 0 ? 3 : 0);
-                ctx.fillStyle = '#05050d';
-                ctx.beginPath();
-                ctx.arc(-7 + lookOffsetX, 2, 4, 0, Math.PI * 2);
-                ctx.arc(7 + lookOffsetX, 2, 4, 0, Math.PI * 2);
-                ctx.fill();
+                    const lookOffsetX = this.vx < 0 ? -3 : (this.vx > 0 ? 3 : 0);
+                    ctx.fillStyle = '#05050d';
+                    ctx.beginPath();
+                    ctx.arc(-7 + lookOffsetX, 2, 4, 0, Math.PI * 2);
+                    ctx.arc(7 + lookOffsetX, 2, 4, 0, Math.PI * 2);
+                    ctx.fill();
 
-                ctx.fillStyle = '#ffffff';
-                ctx.beginPath();
-                ctx.arc(-8 + lookOffsetX, 0, 1.5, 0, Math.PI * 2);
-                ctx.arc(6 + lookOffsetX, 0, 1.5, 0, Math.PI * 2);
-                ctx.fill();
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.arc(-8 + lookOffsetX, 0, 1.5, 0, Math.PI * 2);
+                    ctx.arc(6 + lookOffsetX, 0, 1.5, 0, Math.PI * 2);
+                    ctx.fill();
 
-                ctx.fillStyle = activeSkin.ear;
-                ctx.globalAlpha = 0.7;
-                ctx.beginPath();
-                ctx.arc(-11, 7, 3, 0, Math.PI * 2);
-                ctx.arc(11, 7, 3, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.globalAlpha = 1.0;
+                    ctx.fillStyle = activeSkin.ear;
+                    ctx.globalAlpha = 0.7;
+                    ctx.beginPath();
+                    ctx.arc(-11, 7, 3, 0, Math.PI * 2);
+                    ctx.arc(11, 7, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.globalAlpha = 1.0;
 
-                ctx.strokeStyle = '#05050d';
-                ctx.lineWidth = 1.5;
-                ctx.beginPath();
-                ctx.arc(0, 6, 2, 0, Math.PI);
-                ctx.stroke();
+                    ctx.strokeStyle = '#05050d';
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    ctx.arc(0, 6, 2, 0, Math.PI);
+                    ctx.stroke();
 
-                const leftLegOffset = Math.sin(this.legAnimAngle) * 7;
-                const rightLegOffset = Math.sin(this.legAnimAngle + Math.PI) * 7;
+                    const leftLegOffset = Math.sin(this.legAnimAngle) * 7;
+                    const rightLegOffset = Math.sin(this.legAnimAngle + Math.PI) * 7;
 
-                ctx.fillStyle = glowColor;
-                ctx.beginPath();
-                ctx.arc(-10, 22 + leftLegOffset, 5, 0, Math.PI * 2);
-                ctx.arc(10, 22 + rightLegOffset, 5, 0, Math.PI * 2);
-                ctx.fill();
+                    ctx.fillStyle = glowColor;
+                    ctx.beginPath();
+                    ctx.arc(-10, 22 + leftLegOffset, 5, 0, Math.PI * 2);
+                    ctx.arc(10, 22 + rightLegOffset, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
 
                 if (hasShield) {
                     ctx.beginPath();
@@ -973,6 +1149,146 @@
                 }
 
                 ctx.restore();
+            },
+
+            drawNeroSkin(ctx, skin, earWiggle, glowColor) {
+                const lookOffsetX = this.vx < 0 ? -3 : (this.vx > 0 ? 3 : 0);
+
+                ctx.fillStyle = skin.color;
+                ctx.beginPath();
+                ctx.arc(0, 4, 20, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = skin.core;
+                ctx.beginPath();
+                ctx.arc(0, 4, 14, 0, Math.PI * 2);
+                ctx.fill();
+
+                switch(skin.animal) {
+                    case 'panther':
+                    case 'tiger':
+                        ctx.fillStyle = skin.color;
+                        ctx.save();
+                        ctx.rotate(-0.25 + earWiggle);
+                        ctx.beginPath(); ctx.arc(-13, -16, 7, 0, Math.PI * 2); ctx.fill();
+                        ctx.fillStyle = skin.detailColor; ctx.beginPath(); ctx.arc(-13, -16, 3.5, 0, Math.PI * 2); ctx.fill();
+                        ctx.restore();
+
+                        ctx.fillStyle = skin.color;
+                        ctx.save();
+                        ctx.rotate(0.25 - earWiggle);
+                        ctx.beginPath(); ctx.arc(13, -16, 7, 0, Math.PI * 2); ctx.fill();
+                        ctx.fillStyle = skin.detailColor; ctx.beginPath(); ctx.arc(13, -16, 3.5, 0, Math.PI * 2); ctx.fill();
+                        ctx.restore();
+                        break;
+                    case 'wolf':
+                    case 'fox':
+                        ctx.fillStyle = skin.color;
+                        ctx.save();
+                        ctx.rotate(-0.2 + earWiggle);
+                        ctx.beginPath(); ctx.moveTo(-6, -10); ctx.lineTo(-18, -28); ctx.lineTo(-2, -20); ctx.closePath(); ctx.fill();
+                        ctx.fillStyle = skin.detailColor; ctx.beginPath(); ctx.moveTo(-8, -12); ctx.lineTo(-16, -24); ctx.lineTo(-4, -18); ctx.closePath(); ctx.fill();
+                        ctx.restore();
+
+                        ctx.fillStyle = skin.color;
+                        ctx.save();
+                        ctx.rotate(0.2 - earWiggle);
+                        ctx.beginPath(); ctx.moveTo(6, -10); ctx.lineTo(18, -28); ctx.lineTo(2, -20); ctx.closePath(); ctx.fill();
+                        ctx.fillStyle = skin.detailColor; ctx.beginPath(); ctx.moveTo(8, -12); ctx.lineTo(16, -24); ctx.lineTo(4, -18); ctx.closePath(); ctx.fill();
+                        ctx.restore();
+                        break;
+                    case 'bear':
+                        ctx.fillStyle = skin.color;
+                        ctx.beginPath(); ctx.arc(-14, -15, 8, 0, Math.PI * 2); ctx.arc(14, -15, 8, 0, Math.PI * 2); ctx.fill();
+                        ctx.fillStyle = skin.detailColor;
+                        ctx.beginPath(); ctx.arc(-14, -15, 4, 0, Math.PI * 2); ctx.arc(14, -15, 4, 0, Math.PI * 2); ctx.fill();
+                        break;
+                    case 'owl':
+                        ctx.fillStyle = skin.color;
+                        ctx.beginPath(); ctx.moveTo(-18, -14); ctx.lineTo(-10, -26); ctx.lineTo(-4, -14); ctx.fill();
+                        ctx.beginPath(); ctx.moveTo(18, -14); ctx.lineTo(10, -26); ctx.lineTo(4, -14); ctx.fill();
+                        break;
+                    case 'rabbit':
+                        ctx.fillStyle = skin.color;
+                        ctx.save(); ctx.rotate(-0.15 + earWiggle);
+                        ctx.beginPath(); ctx.ellipse(-9, -28, 5, 18, -0.1, 0, Math.PI * 2); ctx.fill();
+                        ctx.fillStyle = skin.detailColor; ctx.beginPath(); ctx.ellipse(-9, -28, 2.5, 12, -0.1, 0, Math.PI * 2); ctx.fill();
+                        ctx.restore();
+
+                        ctx.fillStyle = skin.color;
+                        ctx.save(); ctx.rotate(0.15 - earWiggle);
+                        ctx.beginPath(); ctx.ellipse(9, -28, 5, 18, 0.1, 0, Math.PI * 2); ctx.fill();
+                        ctx.fillStyle = skin.detailColor; ctx.beginPath(); ctx.ellipse(9, -28, 2.5, 12, 0.1, 0, Math.PI * 2); ctx.fill();
+                        ctx.restore();
+                        break;
+                    case 'dragon':
+                        ctx.fillStyle = skin.detailColor;
+                        ctx.beginPath(); ctx.moveTo(-8, -14); ctx.lineTo(-18, -28); ctx.lineTo(-2, -18); ctx.fill();
+                        ctx.beginPath(); ctx.moveTo(8, -14); ctx.lineTo(18, -28); ctx.lineTo(2, -18); ctx.fill();
+                        ctx.beginPath(); ctx.moveTo(0, -16); ctx.lineTo(-4, -26); ctx.lineTo(4, -26); ctx.fill();
+                        break;
+                    case 'bat':
+                        ctx.fillStyle = skin.color;
+                        ctx.beginPath(); ctx.moveTo(-6, -12); ctx.lineTo(-22, -26); ctx.lineTo(-10, -8); ctx.fill();
+                        ctx.beginPath(); ctx.moveTo(6, -12); ctx.lineTo(22, -26); ctx.lineTo(10, -8); ctx.fill();
+                        break;
+                    case 'stag':
+                        ctx.strokeStyle = skin.detailColor; ctx.lineWidth = 2.5;
+                        ctx.beginPath(); ctx.moveTo(-6, -14); ctx.lineTo(-16, -28); ctx.lineTo(-22, -32); ctx.moveTo(-12, -22); ctx.lineTo(-20, -22); ctx.stroke();
+                        ctx.beginPath(); ctx.moveTo(6, -14); ctx.lineTo(16, -28); ctx.lineTo(22, -32); ctx.moveTo(12, -22); ctx.lineTo(20, -22); ctx.stroke();
+                        break;
+                }
+
+                if (skin.animal === 'owl') {
+                    ctx.fillStyle = skin.detailColor;
+                    ctx.beginPath(); ctx.arc(-7 + lookOffsetX, 2, 7, 0, Math.PI * 2); ctx.arc(7 + lookOffsetX, 2, 7, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = skin.eyeColor;
+                    ctx.beginPath(); ctx.arc(-7 + lookOffsetX, 2, 4, 0, Math.PI * 2); ctx.arc(7 + lookOffsetX, 2, 4, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = '#05050d';
+                    ctx.beginPath(); ctx.arc(-7 + lookOffsetX, 2, 2, 0, Math.PI * 2); ctx.arc(7 + lookOffsetX, 2, 2, 0, Math.PI * 2); ctx.fill();
+                } else {
+                    ctx.fillStyle = skin.eyeColor;
+                    ctx.shadowBlur = 8; ctx.shadowColor = skin.eyeColor;
+                    ctx.beginPath();
+                    ctx.ellipse(-7 + lookOffsetX, 2, 4, 2.5, skin.animal === 'fox' || skin.animal === 'dragon' ? -0.3 : 0, 0, Math.PI * 2);
+                    ctx.ellipse(7 + lookOffsetX, 2, 4, 2.5, skin.animal === 'fox' || skin.animal === 'dragon' ? 0.3 : 0, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#05050d'; ctx.shadowBlur = 0;
+                    ctx.beginPath();
+                    ctx.arc(-7 + lookOffsetX, 2, 1.5, 0, Math.PI * 2);
+                    ctx.arc(7 + lookOffsetX, 2, 1.5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                ctx.fillStyle = skin.noseColor;
+                if (skin.animal === 'owl') {
+                    ctx.beginPath(); ctx.moveTo(lookOffsetX, 5); ctx.lineTo(-3 + lookOffsetX, 10); ctx.lineTo(3 + lookOffsetX, 10); ctx.fill();
+                } else if (skin.animal === 'bear') {
+                    ctx.beginPath(); ctx.ellipse(lookOffsetX, 8, 4.5, 3, 0, 0, Math.PI * 2); ctx.fill();
+                } else {
+                    ctx.beginPath(); ctx.moveTo(-2.5 + lookOffsetX, 6); ctx.lineTo(2.5 + lookOffsetX, 6); ctx.lineTo(lookOffsetX, 9); ctx.fill();
+                }
+
+                if (skin.animal === 'tiger') {
+                    ctx.strokeStyle = skin.detailColor; ctx.lineWidth = 1.5;
+                    ctx.beginPath(); ctx.moveTo(-16, 2); ctx.lineTo(-10, 2); ctx.moveTo(16, 2); ctx.lineTo(10, 2); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(-2, -6); ctx.lineTo(2, -6); ctx.moveTo(0, -9); ctx.lineTo(0, -3); ctx.stroke();
+                }
+
+                if (skin.animal === 'panther' || skin.animal === 'wolf' || skin.animal === 'bat') {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath(); ctx.moveTo(-4 + lookOffsetX, 9); ctx.lineTo(-2 + lookOffsetX, 13); ctx.lineTo(-1 + lookOffsetX, 9); ctx.fill();
+                    ctx.beginPath(); ctx.moveTo(4 + lookOffsetX, 9); ctx.lineTo(2 + lookOffsetX, 13); ctx.lineTo(1 + lookOffsetX, 9); ctx.fill();
+                }
+
+                const leftLegOffset = Math.sin(this.legAnimAngle) * 7;
+                const rightLegOffset = Math.sin(this.legAnimAngle + Math.PI) * 7;
+                ctx.fillStyle = skin.color;
+                ctx.beginPath();
+                ctx.arc(-10, 22 + leftLegOffset, 5, 0, Math.PI * 2);
+                ctx.arc(10, 22 + rightLegOffset, 5, 0, Math.PI * 2);
+                ctx.fill();
             }
         };
 
@@ -991,7 +1307,12 @@
 
             draw(ctx) {
                 if (!currentPetId) return;
-                const petData = PETS.find(p => p.id === currentPetId);
+
+                let petData = PETS.find(p => p.id === currentPetId);
+                if (petData && petData.type === 'ad' && !unlockedPets.includes(petData.id) && !isItemTrialActive(petData.id)) {
+                    currentPetId = 'pet_sparky';
+                    petData = PETS[0];
+                }
                 if (!petData) return;
 
                 ctx.save();
@@ -1020,7 +1341,10 @@
         class LetterHazard {
             constructor(type, customChar, customVx, customVy, isRainbow = false) {
                 this.type = type;
-                const skinSymbols = OBJECT_SKINS.find(s => s.id === currentObjectSkinId) ? OBJECT_SYMBOLS[currentObjectSkinId] : OBJECT_SYMBOLS['obj_animals'];
+                
+                // FIX #2: Optimize object skin lookup & prevent repeated Array.find scans
+                const validObjSkinId = getValidObjectSkinId();
+                const skinSymbols = OBJECT_SYMBOLS[validObjSkinId] || OBJECT_SYMBOLS['obj_animals'];
                 
                 this.isMegaElite = (this.type === 'FALLING' && !isRainbow && Math.random() < 0.03);
                 this.isSuperElite = (this.type === 'FALLING' && !isRainbow && !this.isMegaElite && Math.random() < 0.08);
@@ -1118,7 +1442,6 @@
                 this.earAnim = 0;
                 this.laserState = { active: false, x: 0, width: 0, charge: 0 };
 
-                // 16 Unique Boss Archetypes
                 const bossTypes = [
                     { name: '⚠️ MECHA-CAT OVERLORD ⚠️', shape: 'cat', colorHue: 340, symbol: '🐱', secondaryColor: '#00f3ff', auraGlow: '#f43f5e' },
                     { name: '⚠️ CYBER-DRAGON TITAN ⚠️', shape: 'dragon', colorHue: 130, symbol: '🐉', secondaryColor: '#39ff14', auraGlow: '#10b981' },
@@ -1155,7 +1478,8 @@
                 this.attackTimer++;
 
                 if (this.attackTimer % 80 === 0 && !this.laserState.active) {
-                    const skinSymbols = OBJECT_SYMBOLS[currentObjectSkinId] || OBJECT_SYMBOLS['obj_animals'];
+                    const validObjSkinId = getValidObjectSkinId();
+                    const skinSymbols = OBJECT_SYMBOLS[validObjSkinId] || OBJECT_SYMBOLS['obj_animals'];
                     const randomCount = Math.floor(Math.random() * 3) + 1;
                     const spreadStep = 2.5;
                     const startOffset = -((randomCount - 1) * spreadStep) / 2;
@@ -1775,6 +2099,7 @@
             bossInstance = null;
             isPaused = false;
             petSkillTimer = 0;
+            continuesUsed = 0;
 
             skillCooldowns = { 1: 0, 2: 0, 3: 0 };
             letters = [];
@@ -1793,6 +2118,7 @@
             levelProgressBar.style.width = '0%';
             multiplierBadgeEl.textContent = `${scoreMultiplier.toFixed(1)}x MULTI`;
             modalOverlay.classList.add('opacity-0', 'pointer-events-none');
+            continueAdBtn.classList.add('hidden');
             pauseModal.classList.add('hidden');
             powerupBanner.classList.add('hidden');
             bossHud.classList.add('hidden');
@@ -1803,12 +2129,52 @@
             requestAnimationFrame(gameLoop);
         }
 
+        function continueRun() {
+            lives = 3;
+            updateLivesUI();
+            player.invincibleTimer = 180;
+            letters = [];
+            
+            modalOverlay.classList.add('opacity-0', 'pointer-events-none');
+            continueAdBtn.classList.add('hidden');
+            
+            if (isBossActive && bossInstance) {
+                bossHud.classList.remove('hidden');
+                bossSkillsHud.classList.remove('hidden');
+            }
+
+            isGameRunning = true;
+            lastTime = performance.now();
+            soundFX.playPowerup();
+            showAnnouncement("REVIVED!", "3 SECONDS INVINCIBILITY!");
+            requestAnimationFrame(gameLoop);
+        }
+
+        function watchAdToContinue() {
+            if (continuesUsed >= maxContinues) return;
+
+            adModal.classList.remove('hidden');
+            let timeLeft = 3;
+            adTimerText.textContent = `Continuing run in ${timeLeft} seconds...`;
+            adProgressBar.style.width = '100%';
+
+            const timer = setInterval(() => {
+                timeLeft--;
+                adTimerText.textContent = `Continuing run in ${timeLeft} seconds...`;
+                adProgressBar.style.width = `${(timeLeft / 3) * 100}%`;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    adModal.classList.add('hidden');
+                    continuesUsed++;
+                    continueRun();
+                }
+            }, 1000);
+        }
+
         function gameOver() {
             isGameRunning = false;
             soundFX.playHit();
             bossSkillsHud.classList.add('hidden');
-            coins = 0;
-            updateCoins(0);
 
             if (score > highScore) {
                 highScore = score;
@@ -1825,8 +2191,18 @@
             scoreSummary.classList.add('flex');
 
             modalTitle.textContent = "GAME OVER";
-            modalSubtitle.textContent = "Your cute kitty runner ran out of lives!";
-            startBtn.textContent = "RETRY RUN";
+            modalSubtitle.textContent = "Your cute runner ran out of lives!";
+            startBtn.textContent = "NEW RUN";
+
+            if (continuesUsed < maxContinues) {
+                const remaining = maxContinues - continuesUsed;
+                continueCountValEl.textContent = remaining;
+                continueAdBtn.classList.remove('hidden');
+                continueAdBtn.onclick = watchAdToContinue;
+            } else {
+                continueAdBtn.classList.add('hidden');
+            }
+
             modalOverlay.classList.remove('opacity-0', 'pointer-events-none');
         }
 
@@ -1840,7 +2216,12 @@
             lastTime = now;
             gameTime += dt;
 
-            const activePetObj = PETS.find(p => p.id === currentPetId);
+            let activePetObj = PETS.find(p => p.id === currentPetId);
+            if (activePetObj && activePetObj.type === 'ad' && !unlockedPets.includes(activePetObj.id) && !isItemTrialActive(activePetObj.id)) {
+                currentPetId = 'pet_sparky';
+                activePetObj = PETS[0];
+            }
+
             if (activePetObj && activePetObj.type === 'ad') {
                 petSkillTimer++;
                 if (petSkillTimer >= 600) {
@@ -2043,18 +2424,22 @@
             if (e.code === 'KeyD' || e.code === 'ArrowRight') keys.right = true;
             if (e.code === 'KeyW' || e.code === 'ArrowUp') keys.jump = true;
             if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
-                if (!keys.dash) keys.dash = true;
+                keys.dash = true;
             }
         });
 
         window.addEventListener('keyup', (e) => {
+            // FIX #1: Fixed keyup event check typo from e.key to e.code === 'ArrowLeft'
             if (e.code === 'KeyA' || e.code === 'ArrowLeft') keys.left = false;
             if (e.code === 'KeyD' || e.code === 'ArrowRight') keys.right = false;
             if (e.code === 'KeyW' || e.code === 'ArrowUp') {
                 keys.jump = false;
                 jumpKeyWasPressed = false;
             }
-            if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') keys.dash = false;
+            if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
+                keys.dash = false;
+                dashKeyWasPressed = false;
+            }
         });
 
         document.getElementById('skill-1-btn').addEventListener('click', () => useBossSkill(1));
@@ -2071,11 +2456,20 @@
             btn.addEventListener('touchend', (e) => { 
                 e.preventDefault(); 
                 keys[keyProp] = false; 
-                if(keyProp === 'jump') jumpKeyWasPressed = false;
+                if (keyProp === 'jump') jumpKeyWasPressed = false;
+                if (keyProp === 'dash') dashKeyWasPressed = false;
             });
             btn.addEventListener('mousedown', () => { soundFX.init(); keys[keyProp] = true; });
-            btn.addEventListener('mouseup', () => { keys[keyProp] = false; if(keyProp === 'jump') jumpKeyWasPressed = false; });
-            btn.addEventListener('mouseleave', () => { keys[keyProp] = false; if(keyProp === 'jump') jumpKeyWasPressed = false; });
+            btn.addEventListener('mouseup', () => { 
+                keys[keyProp] = false; 
+                if (keyProp === 'jump') jumpKeyWasPressed = false;
+                if (keyProp === 'dash') dashKeyWasPressed = false;
+            });
+            btn.addEventListener('mouseleave', () => { 
+                keys[keyProp] = false; 
+                if (keyProp === 'jump') jumpKeyWasPressed = false;
+                if (keyProp === 'dash') dashKeyWasPressed = false;
+            });
         }
 
         bindTouchBtn(btnLeft, 'left');
