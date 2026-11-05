@@ -88,7 +88,7 @@
     }
   </style>
 </head>
-<body class="h-screen w-screen flex flex-col justify-between items-center px-2 py-1 sm:px-3 bg-slate-950 text-white relative overflow-hidden">
+<body class="h-screen w-screen flex flex-col justify-between items-center px-2 py-0.5 sm:px-3 bg-slate-950 text-white relative overflow-hidden">
 
   <!-- Background Ambient Glows -->
   <div class="absolute -top-32 -left-32 w-96 h-96 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none"></div>
@@ -233,11 +233,11 @@
   </header>
 
   <!-- Central Play Area: Full-width Maze Canvas & Powerups -->
-  <div id="game-layout" class="w-full max-w-4xl flex flex-col items-center justify-center gap-1 my-0 shrink-0">
+  <div id="game-layout" class="w-full max-w-4xl flex flex-col items-center justify-center gap-0.5 my-0 flex-1 min-h-0">
     
     <!-- Game Canvas Container -->
-    <main id="canvas-wrapper" class="relative w-full flex items-center justify-center min-w-0">
-      <canvas id="gameCanvas" class="rounded-2xl border-2 border-cyan-500/30 shadow-2xl bg-slate-900/90 max-w-full max-h-[50vh] object-contain cursor-pointer"></canvas>
+    <main id="canvas-wrapper" class="relative w-full flex items-center justify-center min-w-0 flex-1 min-h-0">
+      <canvas id="gameCanvas" class="rounded-2xl border-2 border-cyan-500/30 shadow-2xl bg-slate-900/90 max-w-full max-h-full object-contain cursor-pointer"></canvas>
       
       <!-- Status Overlay Banner -->
       <div id="instruction-tip" class="absolute top-2 left-1/2 -translate-x-1/2 bg-slate-900/90 backdrop-blur-md px-3 py-1 rounded-full border border-cyan-500/40 text-[11px] font-semibold text-cyan-200 shadow-lg pointer-events-none transition-all duration-300 flex items-center space-x-1.5">
@@ -247,7 +247,7 @@
     </main>
 
     <!-- Bottom Power-Up / Leap Deck Bar -->
-    <aside class="w-full bg-slate-900/90 backdrop-blur-md border border-amber-500/40 rounded-2xl p-1.5 flex flex-col shadow-xl">
+    <aside class="w-full bg-slate-900/90 backdrop-blur-md border border-amber-500/40 rounded-2xl p-1.5 flex flex-col shadow-xl shrink-0">
       <div class="flex items-center justify-between pb-0.5 mb-1 border-b border-amber-500/30 px-1">
         <h2 class="font-fredoka text-[11px] sm:text-xs text-amber-400 tracking-wide flex items-center space-x-1.5">
           <span>⚡</span>
@@ -2063,7 +2063,7 @@
        ========================================================================= */
     function resizeCanvas() {
       const container = CANVAS.parentElement;
-      const size = Math.min(container.clientWidth, window.innerHeight * 0.50, 580);
+      const size = Math.min(container.clientWidth, container.clientHeight, 580);
       CANVAS.width = size; CANVAS.height = size;
       TILE_SIZE = size / GRID_SIZE;
     }
